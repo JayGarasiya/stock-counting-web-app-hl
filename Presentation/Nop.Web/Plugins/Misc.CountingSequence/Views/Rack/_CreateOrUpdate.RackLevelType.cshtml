@@ -1,0 +1,64 @@
+@model RackLevelTypeModel
+
+
+<form asp-action="@(Model.Id == 0 ? "RackLevelCreate" : "RackLevelEdit")" method="post" onsubmit="return saveRackLevelType(this);">
+    @Html.AntiForgeryToken()
+
+    <div class="modal-header">
+        <h5 class="modal-title">
+            @(Model.Id == 0 ? T("Plugins.Misc.CountingSequence.RackLevelType.CreateRackLevel") : T("Plugins.Misc.CountingSequence.RackLevelType.UpdateRackLevel"))
+        </h5>
+        <button type="button" class="close" data-dismiss="modal">&times;</button>
+    </div>
+    <div class="modal-body">
+        <input asp-for="Id" type="hidden" />
+        <div class="form-group row">
+            <div class="col-md-3">
+                <nop-label asp-for="Name" />
+            </div>
+            <div class="col-md-9">
+                <nop-editor asp-for="Name" />
+                <span asp-validation-for="Name"></span>
+            </div>
+        </div>
+
+        <div class="form-group row">
+            <div class="col-md-3">
+                <nop-label asp-for="FunctionTypeId" />
+            </div>
+            <div class="col-md-9">
+                <nop-select asp-for="FunctionTypeId" asp-items="Model.AvailableFunctionType" />
+            </div>
+        </div>
+
+        <div class="form-group row">
+            <div class="col-md-3">
+                <nop-label asp-for="DisplayOrder" />
+            </div>
+            <div class="col-md-9">
+                <nop-editor asp-for="DisplayOrder" />
+                <span asp-validation-for="DisplayOrder"></span>
+            </div>
+        </div>
+
+        <div class="form-group row">
+            <div class="col-md-3">
+                <nop-label asp-for="IsVisible" />
+            </div>
+            <div class="col-md-9">
+                <nop-editor asp-for="IsVisible" />
+                <span asp-validation-for="IsVisible"></span>
+            </div>
+        </div>
+        
+    </div>
+
+    <div class="modal-footer">
+        <button type="submit" class="btn btn-primary">
+            @T("Admin.Common.Save")
+        </button>
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">
+            @T("Admin.Common.Cancel")
+        </button>
+    </div>
+</form>

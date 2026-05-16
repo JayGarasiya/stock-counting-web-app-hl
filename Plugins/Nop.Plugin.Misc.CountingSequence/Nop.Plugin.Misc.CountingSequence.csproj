@@ -1,0 +1,252 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+	<PropertyGroup>
+		<TargetFramework>net9.0</TargetFramework>
+		<Copyright>Copyright © Nop Solutions, Ltd</Copyright>
+		<Company>Nop Solutions, Ltd</Company>
+		<Authors>Nop Solutions, Ltd</Authors>
+		<PackageLicenseUrl></PackageLicenseUrl>
+		<PackageProjectUrl>https://www.nopcommerce.com/</PackageProjectUrl>
+		<RepositoryUrl>https://github.com/nopSolutions/nopCommerce</RepositoryUrl>
+		<RepositoryType>Git</RepositoryType>
+		<OutputPath>$(SolutionDir)\Presentation\Nop.Web\Plugins\Misc.CountingSequence</OutputPath>
+		<OutDir>$(OutputPath)</OutDir>
+		<!--Set this parameter to true to get the dlls copied from the NuGet cache to the output of your project. 
+    You need to set this parameter to true if your plugin has a nuget package 
+    to ensure that the dlls copied from the NuGet cache to the output of your project-->
+		<CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+		<ImplicitUsings>enable</ImplicitUsings>
+	</PropertyGroup>
+	<ItemGroup>
+	  <Compile Remove="Areas\Admin\Views\CountingSequenceAdmin\**" />
+	  <Compile Remove="Views\ShipmentTransit - Copy\**" />
+	  <EmbeddedResource Remove="Areas\Admin\Views\CountingSequenceAdmin\**" />
+	  <EmbeddedResource Remove="Views\ShipmentTransit - Copy\**" />
+	  <None Remove="Areas\Admin\Views\CountingSequenceAdmin\**" />
+	  <None Remove="Views\ShipmentTransit - Copy\**" />
+	</ItemGroup>
+	<ItemGroup>
+	  <None Remove="Areas\Admin\Views\Shared\_AdminScripts.cshtml" />
+	  <None Remove="Content\images\back.png" />
+	  <None Remove="Content\images\check.png" />
+	  <None Remove="Content\js\calculator.js" />
+	  <None Remove="Views\Channel\List.cshtml" />
+	  <None Remove="Views\Channel\_CreateOrUpdate.cshtml" />
+	  <None Remove="Views\BackOrders\List.cshtml" />
+	  <None Remove="Views\BackOrders\_CreateOrUpdate.cshtml" />
+	  <None Remove="Views\CountingSequence\StartCount.cshtml" />
+	  <None Remove="Views\CountingSequence\_InUsePallet.cshtml" />
+	  <None Remove="Views\CountingSequence\_ShipmentDispatch.cshtml" />
+	  <None Remove="Views\History\List.cshtml" />
+	  <None Remove="Views\Pallet\Edit.cshtml" />
+	  <None Remove="Views\Pallet\List.cshtml" />
+	  <None Remove="Content\images\avatar-1.jpg" />
+	  <None Remove="Content\images\HL-logo.png" />
+	  <None Remove="Views\Pallet\PalletProductAddPopup.cshtml" />
+	  <None Remove="Views\Pallet\_CreateOrUpdate.cshtml" />
+	  <None Remove="Views\Pallet\_CreateOrUpdate.Info.cshtml" />
+	  <None Remove="Views\Pallet\_CreateOrUpdate.Products.cshtml" />
+	  <None Remove="Views\Rack\Create.cshtml" />
+	  <None Remove="Views\Rack\List.cshtml" />
+	  <None Remove="Views\Rack\RackLevelTypeList.cshtml" />
+	  <None Remove="Views\Rack\RackProductAddPopup.cshtml" />
+	  <None Remove="Views\Rack\_CreateOrUpdate.cshtml" />
+	  <None Remove="Views\Rack\_CreateOrUpdate.RackLevelType.cshtml" />
+	  <None Remove="Views\ShipmentDispatch\List.cshtml" />
+	  <None Remove="Views\ShipmentDispatch\_CreateOrUpdate.cshtml" />
+	  <None Remove="Views\ShipmentTransit\List.cshtml" />
+	  <None Remove="Views\Stock\List.cshtml" />
+	</ItemGroup>
+	
+  <ItemGroup>
+    <Content Include="Areas\Admin\Views\Shared\_AdminScripts.cshtml">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Content\images\back.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Content\images\check.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Content\js\calculator.js">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Views\Channel\List.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Views\Channel\_CreateOrUpdate.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Views\BackOrders\List.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Views\BackOrders\_CreateOrUpdate.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Views\CountingSequenceQrButton.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Views\CountingSequence\PalletCountingSequenceSummary.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Views\CountingSequence\RackCountingSequenceSummary.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Views\CountingSequence\List.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Views\CountingSequence\CountingSequencePalletProductDetails.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Views\CountingSequence\CountingSequenceRackProductDetails.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Views\CountingSequence\StartCount.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Views\CountingSequence\_InUsePallet.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Views\CountingSequence\_ShipmentDispatch.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Views\CountingSequence\_WarehousesPopup.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Views\Customer\Login.cshtml">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Views\History\List.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Views\Pallet\Create.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Views\Pallet\Edit.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Views\Pallet\List.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Views\Pallet\PalletProductAddPopup.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Views\Pallet\_CreateOrUpdate.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Areas\Admin\Views\Shared\_AdminLayout.cshtml">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Areas\Admin\Views\_ViewImports.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Content\css\styles.css">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Content\images\avatar-1.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Content\images\HL-logo.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="plugin.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Views\Configure.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Views\Pallet\_CreateOrUpdate.Info.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Views\Pallet\_CreateOrUpdate.Info.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Views\Pallet\_CreateOrUpdate.Products.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Views\Rack\Edit.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Views\Rack\Create.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Views\Rack\List.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Views\Rack\RackLevelTypeList.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Views\Rack\RackProductAddPopup.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Views\Rack\_CreateOrUpdate.Products.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Views\Rack\_CreateOrUpdate.Info.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Views\Rack\_CreateOrUpdate.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Views\Rack\_CreateOrUpdate.RackLevelType.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Views\Shared\_Root.cshtml">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Views\ShipmentDispatch\List.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Views\ShipmentDispatch\_CreateOrUpdate.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Views\ShipmentTransit\Create.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Views\ShipmentTransit\Edit.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Views\ShipmentTransit\List.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Views\ShipmentTransit\_AddItem.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Views\ShipmentTransit\_CreateOrUpdate.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Views\ShipmentTransit\_CreateOrUpdate.Info.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Views\Stock\List.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Views\_ViewImports.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="..\..\Libraries\Nop.Data\Nop.Data.csproj" />
+		<ProjectReference Include="..\..\Presentation\Nop.Web\Nop.Web.csproj" />
+		<ClearPluginAssemblies Include="$(SolutionDir)\Build\ClearPluginAssemblies.proj" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <PackageReference Include="QRCoder" Version="1.4.3" />
+	</ItemGroup>
+
+	<!-- This target execute after "Build" target -->
+	<Target Name="NopTarget" AfterTargets="Build">
+		<!-- Delete unnecessary libraries from plugins path -->
+		<MSBuild Projects="@(ClearPluginAssemblies)" Properties="PluginPath=$(OutDir)" Targets="NopClear" />
+	</Target>
+	
+</Project>

@@ -1,0 +1,82 @@
+@model BackOrdersModel
+
+<form asp-action="@(Model.Id == 0 ? "Create" : "Edit")" method="post" onsubmit="return saveBackOrders(this);">
+    @Html.AntiForgeryToken()
+
+    <div class="modal-header">
+        <h5 class="modal-title">
+            @(Model.Id == 0 ? T("Plugins.Misc.CountingSequence.BackOrder.CreateBackOrder") : T("Plugins.Misc.CountingSequence.BackOrder.EditBackOrder"))
+        </h5>
+        <button type="button" class="close" data-dismiss="modal">&times;</button>
+    </div>
+    <div class="modal-body">
+        <input asp-for="Id" type="hidden" />
+        <div class="form-group row">
+            <div class="col-md-3">
+                <nop-label asp-for="ReferenceNo" />
+            </div>
+            <div class="col-md-9">
+                <nop-editor asp-for="ReferenceNo" />
+                <span asp-validation-for="ReferenceNo"></span>
+            </div>
+        </div>
+
+        <div class="form-group row">
+            <div class="col-md-3">
+                <nop-label asp-for="ChannelId" />
+            </div>
+            <div class="col-md-9">
+                <nop-select asp-for="ChannelId" asp-items="Model.AvailableChannel" />
+            </div>
+        </div>
+
+        <div class="form-group row">
+            <div class="col-md-3">
+                <nop-label asp-for="ProductId" />
+            </div>
+            <div class="col-sm-9">
+                <nop-select asp-for="ProductId" asp-items="Model.AvailableProduct" />
+            </div>
+        </div>
+
+        <div class="form-group row">
+            <div class="col-md-3">
+                <nop-label asp-for="Quantity" />
+            </div>
+            <div class="col-md-9">
+                <nop-editor asp-for="Quantity" />
+                <span asp-validation-for="Quantity"></span>
+            </div>
+        </div>
+
+        <div class="form-group row">
+            <div class="col-md-3">
+                <nop-label asp-for="Status" />
+            </div>
+            <div class="col-md-9">
+                <nop-select asp-for="Status"
+                            asp-items="Model.AvailableStatus" />
+                <span asp-validation-for="Status"></span>
+            </div>
+        </div>
+
+        <div class="form-group row">
+            <div class="col-md-3">
+                <nop-label asp-for="OrderDate" />
+            </div>
+            <div class="col-md-9">
+                <nop-editor asp-for="OrderDate" />
+                <span asp-validation-for="OrderDate"></span>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-footer">
+        <button type="submit" class="btn btn-primary">
+            @T("Admin.Common.Save")
+        </button>
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">
+            @T("Admin.Common.Cancel")
+        </button>
+    </div>
+</form>

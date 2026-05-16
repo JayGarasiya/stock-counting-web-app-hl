@@ -1,0 +1,540 @@
+@using Nop.Core.Domain.Catalog
+@model CountingSequenceRackProductDetail
+
+@{
+    Layout = "_AdminLayout";
+    const string prefix = "counting-sequence";
+    NopHtml.AppendScriptParts(ResourceLocation.Footer, "~/Plugins/Misc.CountingSequence/Content/js/calculator.js");
+}
+<script src="~/lib_npm/chart.js/chart.umd.min.js"></script>
+
+<div class="content-header clearfix">
+    <input type="hidden" id="stockCountId" name="StockCountId" value="@Model.StockCountId" />
+    <div class="float-left">
+        <h3 class="mb-0">
+            <strong>@Model.StockCountModel.Name</strong>
+        </h3>
+    </div>
+
+    <div class="float-right d-flex align-items-center flex-wrap wearhouse-header-data" style="gap:25px;">
+        <div>
+            <i class="fas fa-arrows-alt-v"></i>
+            <strong>@Model.SequenceLevelType</strong>
+        </div>
+
+        <div>
+            <i class="fas fa-arrows-alt-h"></i>
+            <strong>@Model.SequencePositionType</strong>
+        </div>
+
+        <div>
+            <i class="fas fa-arrows-alt-v"></i>
+            <strong>@Model.ProductPositionLevel</strong>
+        </div>
+
+        <div>
+            <i class="fas fa-layer-group"></i>
+            <strong>@Model.StockCountModel.CountType</strong>
+        </div>
+
+        <div>
+            <i class="fas fa-warehouse"></i>
+            <strong>@Model.StockCountModel.WarehouseName</strong>
+        </div>
+
+        <div>
+            <i class="far fa-calendar-alt"></i>
+            <strong>@T("Plugins.Misc.CountingSequence.CountCreated")</strong> (@Model.StockCountModel.CreatedOnUtc)
+        </div>
+
+        <div>
+            <i class="far fa-calendar-alt"></i>
+            <strong>@Model.StockCountModel.ProgressStatusName</strong>
+        </div>
+    </div>
+</div>
+<section class="content">
+    <div class="container-fluid">
+        <div class="container-fluid">
+            <form id="countsequenceform" class="hl_countform">
+                @Html.AntiForgeryToken()
+
+                <input type="hidden" name="StockCountId" value="@Model.StockCountId" />
+                <input type="hidden" name="CurrentIndex" value="@Model.CurrentIndex" />
+                <input type="hidden" name="RackIndex" value="@Model.RackIndex" />
+                <input type="hidden" name="ProductDetailsModel.Id" value="@Model.ProductDetailsModel.Id" />
+
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="row">
+                            <div class="col-md-5">
+                                <div class="card card-primary card-outline">
+                                    <div class="card-body">
+                                        <div class="product-info-section">
+                                            @{
+                                                var attributes = Model.ProductDetailsModel.ProductSpecificationModel.Groups.FirstOrDefault().Attributes.ToList();
+                                            }
+
+                                            <h3>@T("Plugins.Misc.CountingSequence.StockCount.ProductInformation")</h3>
+
+                                            <div class="hl_countform_inner">
+                                                <ul>
+                                                    <li>
+                                                        <strong>@T("Plugins.Misc.CountingSequence.StockCount.Product.Brand"):</strong> @Model.CategoryName
+                                                    </li>
+                                                    <li>
+                                                        <strong>@T("Plugins.Misc.CountingSequence.StockCount.Product.Name"):</strong> @Model.ProductDetailsModel.Name
+                                                    </li>
+
+                                                    @foreach (var value in attributes)
+                                                    {
+                                                        <li>
+                                                            <strong>@value.Name:</strong> @Html.Raw(value.Values.FirstOrDefault().ValueRaw)
+                                                        </li>
+                                                    }
+
+                                                    <li>
+                                                        <strong>@T("Plugins.Misc.CountingSequence.StockCount.Product.Quantity"):</strong> @Model.QuantityPerPack
+                                                    </li>
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-md-3">
+                                <div class="card card-primary card-outline">
+                                    <div class="card-body">
+                                        <div class="qr-code-section">
+                                            <h3>@T("Plugins.Misc.CountingSequence.StockCount.ProductQRCodeImage")</h3>
+                                            <div class="picture hl_countform_inner">
+                                                @{
+                                                    var picture = Model.ProductDetailsModel.PictureModels.FirstOrDefault()
+                                                    ?? Model.ProductDetailsModel.DefaultPictureModel;
+                                                    <a href="@(await NopUrl.RouteGenericUrlAsync<Product>(new { SeName = Model.ProductDetailsModel.SeName }))" title="@picture?.Title">
+                                                        <img alt="@picture?.AlternateText" src="@picture?.ImageUrl" title="@picture?.Title" />
+                                                    </a>
+                                                }
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-md-4">
+                                <div class="card card-primary card-outline">
+                                    <div class="card-body">
+                                        <div class="other-locations-section">
+                                            <h3>@T("Plugins.Misc.CountingSequence.StockCount.ProductOnOtherLocations")</h3>
+                                            <div class="hl_countform_inner">
+                                                @foreach (var productRack in Model.AvailableProductRacks)
+                                                {
+                                                    <strong class="warehouse_location_list">@productRack.Name</strong>
+                                                }
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-8 col-xl-9">
+                                <div class="card card-primary card-outline">
+                                    <div class="card-body">
+                                        <div class="count-sheet-section">
+                                            <h3>@T("Plugins.Misc.CountingSequence.StockCount.ProductCountSheet")</h3>
+                                            <div class="count-sheet-inner">
+                                                <div class="count-sheet-data">
+                                                    <div id="countSheetContainer" class="hl_countform_inner">
+                                                        @for (int i = 0; i < Model.CountSheetRows.Count; i++)
+                                                        {
+                                                            <div class="count-row">
+                                                                <strong>@T("Plugins.Misc.CountingSequence.StockCount.Count") #@(i + 1):</strong>
+
+                                                                <div class="count_label">
+                                                                    <p>@T("Plugins.Misc.CountingSequence.StockCount.Cases")</p>
+                                                                    <input type="number" name="CountSheetRows[@i].Cases" value="@Model.CountSheetRows[i].Cases" oninput="calculateRow(this)" />
+                                                                </div>
+                                                                <div class="count_label">
+                                                                    <p>@T("Plugins.Misc.CountingSequence.StockCount.Units")</p>
+                                                                    <input type="number" name="CountSheetRows[@i].Units" value="@Model.CountSheetRows[i].Units" oninput="calculateRow(this)" />
+                                                                </div>
+                                                                <span class="total_count">= 0 @T("Plugins.Misc.CountingSequence.StockCount.Units")</span>
+                                                            </div>
+                                                        }
+                                                    </div>
+                                                    <button type="button" class="btn btn-success add-row-count-btn" onclick="addRow()">@T("Plugins.Misc.CountingSequence.StockCount.AddRow")</button>
+
+                                                    <div class="hl_countform_inner count-summary">
+                                                        <div id="count-summary-current-location">
+                                                            <div class="count-summary-label">
+                                                                <span>@T("Plugins.Misc.CountingSequence.StockCount.TotalAtThisLocation"):</span>
+                                                            </div>
+                                                            <div class="count-summary-row">
+                                                                <span>@T("Plugins.Misc.CountingSequence.StockCount.Current")</span>
+                                                                <input type="hidden" id="TotalCountingQuantity" name="TotalCountingQuantity" value="@Model.TotalCountingQuantity" />
+                                                                <span id="currentTotal">@Model.TotalCountingQuantity @T("Plugins.Misc.CountingSequence.StockCount.Units")</span>
+                                                            </div>
+                                                            <div class="count-summary-row">
+                                                                <span>@T("Plugins.Misc.CountingSequence.StockCount.LastMonth")</span>
+                                                                <span>@Model.TotalCountingQuantityLastMonth @T("Plugins.Misc.CountingSequence.StockCount.Units")</span>
+                                                            </div>
+                                                        </div>
+
+                                                        <div id="count-summary-product-count">
+                                                            <div class="count-summary-label">
+                                                                <span>@T("Plugins.Misc.CountingSequence.StockCount.TotalProductCount"):</span>
+                                                            </div>
+                                                            <div class="count-summary-row">
+                                                                <span>@T("Plugins.Misc.CountingSequence.StockCount.Current")</span>
+                                                                <span id="currentTotalProduct">@Model.TotalProductQuantity @T("Plugins.Misc.CountingSequence.StockCount.Units")</span>
+                                                            </div>
+                                                            <div class="count-summary-row">
+                                                                <span>@T("Plugins.Misc.CountingSequence.StockCount.LastMonth")</span>
+                                                                <span>@Model.TotalProductQuantityLastMonth @T("Plugins.Misc.CountingSequence.StockCount.Units")</span>
+                                                            </div>
+                                                        </div>
+
+                                                        <div id="count-summary-unit-sales">
+                                                            <div class="count-summary-label">
+                                                                <span>@T("Plugins.Misc.CountingSequence.StockCount.UnitSales"):</span>
+                                                            </div>
+                                                            <div class="count-summary-row">
+                                                                <span>@T("Plugins.Misc.CountingSequence.StockCount.UnitSalesThisMonth")</span>
+                                                                <span>@Model.TotalSaleThisMonth @T("Plugins.Misc.CountingSequence.StockCount.Units")</span>
+                                                            </div>
+                                                            <div class="count-summary-row">
+                                                                <span>@T("Plugins.Misc.CountingSequence.StockCount.UnitSalesLast6Month")</span>
+                                                                <span>@Model.TotalSaleThisLastSixMonth @T("Plugins.Misc.CountingSequence.StockCount.Units")</span>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="calculator-section">
+                                                    <div class="hl_countform_inner">
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-md-4 col-xl-3">
+                                <div class="card card-primary card-outline">
+                                    <div class="card-body">
+                                        <div class="breadcrumb-section">
+                                            <h3>@T("Plugins.Misc.CountingSequence.StockCount.BreadcrumbSequence")</h3>
+                                            <div class="hl_countform_inner">
+                                                @for (int i = 0; i < Model.AvailableRacks.Count; i++)
+                                                {
+                                                    var rack = Model.AvailableRacks[i];
+                                                    var data = rack.Id == Model.CurrentRackId ? "active-rack" : "";
+
+                                                    <a href="javascript:void(0);"
+                                                       class="@data"
+                                                       onclick="goToRack(@i)">
+                                                        <strong>@rack.Name</strong>
+                                                    </a>
+                                                }
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="card card-primary card-outline">
+                                    <div class="card-body">
+                                        <div class="shipment-section">
+                                            <div class="recent-shipment-section">
+                                                <h3>@T("Plugins.Misc.CountingSequence.StockCount.RecentShipments")</h3>
+                                                <div class="hl_countform_inner">
+                                                    <div class="shipment_card">
+                                                        @foreach (var recentShipment in Model.RecentShipments)
+                                                        {
+                                                            <div class="shipment_list">
+                                                                <span class="shipment_name">@recentShipment.ShipmentName</span>
+                                                                <span class="shipment_date">@recentShipment.ShipmentDispatchesDate</span>
+                                                                <span class="shipment_qty">Qty: @recentShipment.ShipmentTransitItemsQuantity</span>
+                                                            </div>
+                                                        }
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div class="incoming-shipment-section">
+                                                <h3>@T("Plugins.Misc.CountingSequence.StockCount.IncomingShipments")</h3>
+                                                <div class="hl_countform_inner">
+                                                    <div class="shipment_card">
+                                                        @foreach (var incomingShipment in Model.IncomingShipments)
+                                                        {
+                                                            <div class="shipment_list">
+                                                                <span class="shipment_name">@incomingShipment.ShipmentName</span>
+                                                                <span class="shipment_date">@incomingShipment.ShipmentDispatchesDate</span>
+                                                                <span class="shipment_qty">Qty: @incomingShipment.ShipmentTransitItemsQuantity</span>
+                                                            </div>
+                                                        }
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-md-8">
+                                <div class="card card-primary card-outline">
+                                    <div class="card-body">
+                                        <div class="sale-and-count-history-section">
+                                            <h3>@T("Plugins.Misc.CountingSequence.StockCount.SaleAndCountHistory")</h3>
+                                            <div class="hl_countform_inner">
+                                                <div class="card card-primary card-outline" id="@(prefix)-card">
+                                                    <div class="card-body">
+                                                        <div class="chart" style="height: 350px;">
+                                                            <canvas id="@(prefix)-chart" height="350"></canvas>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="navigation-buttons count-navigation-buttons">
+                            @if (!(Model.RackIndex == 0 && Model.CurrentIndex == 0))
+                            {
+                                <button type="button" class="btn btn-secondary back-button" onclick="goBack()">
+                                    @T("Plugins.Misc.CountingSequence.StockCount.BackButton")
+                                </button>
+                            }
+                            <button type="button" class="btn btn-primary next-button" onclick="saveAndNext()">@T("Plugins.Misc.CountingSequence.StockCount.SaveAndNext")</button>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</section>
+
+<script>
+    window.countIndex = window.countIndex ?? @Model.CountSheetRows.Count;
+
+    var unitsPerCase = @Model.QuantityPerPack;
+    var totalProductQuantityInStock = @Model.TotalProductQuantity;
+
+    $(document).ready(function () {
+        $(".count-row").each(function () {
+            calculateRow($(this).find("input").first());
+        });
+    });
+
+    function addRow() {
+        let html = `
+            <div class="count-row">
+                <strong>@T("Plugins.Misc.CountingSequence.StockCount.Count") #${window.countIndex + 1}:</strong>
+                <div class="count_label">
+                    <p>@T("Plugins.Misc.CountingSequence.StockCount.Cases")</p>
+                    <input type="number" name="CountSheetRows[${window.countIndex}].Cases" value="0" oninput="calculateRow(this)"/>
+                </div>
+                <div class="count_label">
+                    <p>@T("Plugins.Misc.CountingSequence.StockCount.Units")</p>
+                    <input type="number" name="CountSheetRows[${window.countIndex}].Units" value="0" oninput="calculateRow(this)"/>
+                </div>
+                <span class="total_count">= 0 @T("Plugins.Misc.CountingSequence.StockCount.Units")</span>
+            </div>
+        `;
+
+        $("#countSheetContainer").append(html);
+        window.countIndex++;
+    }
+
+    function saveAndNext() {
+        var data = $("#countsequenceform").serialize();
+
+        $.ajax({
+            url: '@Url.Action("SaveRackCountSheet")',
+            type: 'POST',
+            data: data,
+            success: function (response) {
+
+                if (response.success) {
+
+                    if (response.isCompleted) {
+                        loadRackSummary(); // PERFECT
+                    } else {
+                        window.location.href = response.nextUrl;
+                    }
+                }
+            }
+        });
+    }
+
+    function goBack() {
+        var stockCountId = $("input[name='StockCountId']").val();
+        var rackIndex = parseInt($("input[name='RackIndex']").val());
+        var productIndex = parseInt($("input[name='CurrentIndex']").val());
+
+        // move back
+        productIndex--;
+
+        window.location.href =
+            '@Url.Action("CountingSequenceRacksProductDetails")'
+            + '?stockCountId=' + stockCountId
+            + '&rackIndex=' + rackIndex
+            + '&productIndex=' + productIndex;
+    }
+
+    function loadRackSummary() {
+        var stockCountId = $("input[name='StockCountId']").val();
+
+        $.get('@Url.Action("LoadRackSummary")', { stockCountId: stockCountId }, function (html) {
+
+            // Replace whole content
+            $(".content-header").empty();
+            $(".content").html(html);
+        });
+    }
+
+    function completeRackCount() {
+        var stockCountId = $("input[name='StockCountId']").val();
+        var token = $('input[name="__RequestVerificationToken"]').val();
+
+        $.ajax({
+            type: "POST",
+            url: '@Url.Action("CompleteRackCount")',
+            data: {
+                stockCountId: stockCountId,
+                __RequestVerificationToken: token
+            },
+            success: function () {
+                window.location.href = '@Url.Action("List")';
+            }
+        });
+    }
+
+    function goToRack(rackIndex) {
+        if (confirm("Unsaved data will be lost. Do you want to continue?")) {
+            // redirect
+
+            var stockCountId = $("input[name='StockCountId']").val();
+
+            // always start from first product in that rack
+            var productIndex = 0;
+
+            window.location.href =
+                '@Url.Action("CountingSequenceRacksProductDetails")'
+                + '?stockCountId=' + stockCountId
+                + '&rackIndex=' + rackIndex
+                + '&productIndex=' + productIndex;
+        }
+    }
+
+    function calculateRow(element) {
+        var row = $(element).closest('.count-row');
+
+        var cases = parseInt(row.find("input[name$='.Cases']").val()) || 0;
+        var units = parseInt(row.find("input[name$='.Units']").val()) || 0;
+
+        var total = (cases * unitsPerCase) + units;
+
+        row.find(".total_count").text("= " + total + " @T("Plugins.Misc.CountingSequence.StockCount.Units")");
+
+        updateGrandTotal();
+    }
+
+    function updateGrandTotal() {
+        var grandTotal = 0;
+
+        $(".count-row").each(function () {
+
+            var cases = parseInt($(this).find("input[name$='.Cases']").val()) || 0;
+            var units = parseInt($(this).find("input[name$='.Units']").val()) || 0;
+
+            grandTotal += (cases * unitsPerCase) + units;
+        });
+
+        $("#currentTotal").text(grandTotal + " @T("Plugins.Misc.CountingSequence.StockCount.Units")");
+        $("#TotalCountingQuantity").val(grandTotal);
+    }
+</script>
+
+<script>
+    $(document).ready(function () {
+        var postData = {
+                rackId: @Model.CurrentRackId,
+                productId: @Model.ProductDetailsModel.Id,
+            };
+            addAntiForgeryToken(postData);
+
+        $.ajax({
+            type: "GET",
+            url: "@Url.Action("LoadRackCountingSequenceStatistics", "CountingSequence")",
+            data: postData,
+            success: function (data) {
+                var labels = [];
+                var countData = [];
+                var salesData = [];
+
+                for (var i = 0; i < data.length; i++) {
+                    labels.push(data[i].Month);
+                    countData.push(data[i].Count);
+                    salesData.push(data[i].Sales);
+                }
+
+                const config = {
+                    type: 'line',
+                    data: {
+                        labels: labels,
+                        datasets: [
+                            {
+                                label: 'Count Quantity',
+                                data: countData,
+                                borderColor: 'rgba(54, 162, 235, 1)',
+                                backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                                tension: 0.3,
+                                pointRadius: 5
+                            },
+                            {
+                                label: 'Sales Quantity',
+                                data: salesData,
+                                borderColor: 'rgba(75, 192, 192, 1)',
+                                backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                                tension: 0.3,
+                                pointRadius: 5
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                display: true
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                ticks: {
+                                    stepSize: 1
+                                }
+                            }
+                        }
+                    },
+                };
+
+                new Chart(
+                    document.getElementById("@(prefix)-chart"),
+                    config
+                );
+            }
+        });
+    });
+</script>

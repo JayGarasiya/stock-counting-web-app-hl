@@ -1,0 +1,87 @@
+﻿@model List<ShipmentDispatchModel>
+
+<div class="modal-header">
+    <h5 class="modal-title">
+        @T("Plugins.Misc.CountingSequence.SelectShipmentDispatch")
+    </h5>
+    <button type="button" class="close" data-dismiss="modal">&times;</button>
+</div>
+
+<div class="modal-body">
+    <table class="table table-bordered table-hover shipmentDispatch-table">
+        <tbody id="shipmentDispatchTableBody">
+            @if(Model != null && Model.Count > 0)
+            {
+                foreach (var shipmentDispatch in Model)
+                {
+                    <tr>
+                        <td>
+                            <label class="warehouse_label">
+                                <input type="checkbox" name="selectedShipmentDispatchIds" value="@shipmentDispatch.Id" data-name="@shipmentDispatch.Name" />
+                                <p>@shipmentDispatch.Name</p>
+                            </label>
+                        </td>
+                    </tr>
+                }
+            }
+            else
+            {
+                <tr>
+                    <td>
+                        <label class="warehouse_label">
+                            <p>@T("Plugins.Misc.CountingSequence.ShipmentDispatch.NoRecords")</p>
+                        </label>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+<div class="modal-footer">
+    <button type="button" class="btn btn-secondary" data-dismiss="modal">
+        @T("Admin.Common.Cancel")
+    </button>
+
+    <button type="button" class="btn btn-primary" onclick="shipmentDispatchPopup()">
+        @T("Plugins.Misc.CountingSequence.Create.ShipmentDispatch")
+    </button>
+</div>
+
+<script>
+    function shipmentDispatchPopup() {
+
+        var selected = $("input[name='selectedShipmentDispatchIds']:checked");
+        $("#shipmentDispatchTableBody .error-row").remove();
+
+        // collect IDs
+        var shipmentDispatchIds = selected.map(function () {
+            return $(this).val();
+        }).get();
+
+        // store globally (optional, keep only if really needed)
+        window.selectedShipmentDispatchIds = shipmentDispatchIds;
+
+        // close shipment popup
+        $('#shipmentModal').modal('hide');
+
+        // open pallet popup
+        openInUsePalletPopup(shipmentDispatchIds);
+    }
+
+    function openInUsePalletPopup(shipmentDispatchIds) {
+        $.ajax({
+            url: '@Url.Action("InUsePallet", "CountingSequence")',
+            type: 'GET',
+            traditional: true,
+            data: { shipmentDispatchIds: shipmentDispatchIds },
+            success: function (data) {
+                $('#inUsePalletModalContent').html(data);
+                $('#inUsePalletModal').modal('show');
+            },
+            error: function (err) {
+                console.error("Error loading pallet popup:", err);
+            }
+        });
+    }
+</script>

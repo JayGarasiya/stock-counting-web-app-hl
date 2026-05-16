@@ -1,0 +1,45 @@
+﻿@inherits Nop.Web.Framework.Mvc.Razor.NopRazorPage<TModel>
+@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+@addTagHelper *, Nop.Web.Framework
+
+@inject IWebHelper webHelper
+@inject IDateTimeHelper dateTimeHelper
+@inject ICustomerService customerService
+@inject IEventPublisher eventPublisher
+@inject LocalizationSettings localizationSettings
+@inject StoreInformationSettings storeInformationSettings
+@inject AdminAreaSettings adminAreaSettings
+@inject Nop.Services.Localization.ILanguageService languageService
+@inject INopHtmlHelper NopHtml
+@inject IPermissionService permissionService
+@inject IWorkContext workContext
+@inject INopFileProvider fileProvider;
+@inject Microsoft.AspNetCore.Hosting.IWebHostEnvironment WebHostEnvironment
+
+@using Nop.Core.Domain.Localization
+@using Nop.Core.Infrastructure
+@using Nop.Services.Common
+@using System
+@using System.Globalization
+@using System.Text.Encodings.Web
+@using System.Linq
+@using Nop.Core
+@using Nop.Core.Domain
+@using Nop.Core.Domain.Common
+@using Nop.Core.Events
+@using Nop.Services.Customers
+@using Nop.Services.Helpers
+@using Nop.Services.Security
+@using Nop.Web
+@using Nop.Web.Areas.Admin
+@using Nop.Web.Areas.Admin.Components
+@using Nop.Web.Areas.Admin.Models.Common
+@using Nop.Web.Components
+@using Nop.Web.Extensions
+@using Nop.Web.Framework
+@using Nop.Web.Framework.Events
+@using Nop.Web.Framework.Extensions
+@using Nop.Web.Framework.Infrastructure
+@using Nop.Web.Framework.UI
+@using static Nop.Services.Common.NopLinksDefaults
+@using Nop.Web.Framework.Models.DataTables

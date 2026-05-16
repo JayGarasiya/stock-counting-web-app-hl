@@ -1,0 +1,213 @@
+@using System.Text.Json
+@model AddProductToCategorySearchModel
+
+@{
+    Layout = "_AdminPopupLayout";
+
+    //page title
+    ViewBag.PageTitle = T("Admin.Catalog.Categories.Products.AddNew").Text;
+}
+
+@{
+    var addModel = ViewBag.AddModel as AddProductToRackModel;
+}
+
+@if (ViewBag.RefreshPage == true)
+{
+    <script>
+        try {
+            window.opener.document.getElementById('btnRefreshRackProductLevels').click();
+        }
+        catch (e) {
+            console.error('ERROR:', e.message);
+        }
+        window.close();
+    </script>
+}
+else
+{
+    <form asp-controller="Rack" asp-action="RackProductAddPopup"
+          asp-route-rackId="@Context.Request.Query["rackId"]"
+          asp-route-levelId="@Context.Request.Query["levelId"]"
+          method="post">
+        @Html.AntiForgeryToken()
+
+        <input type="hidden" name="RackId" value="@Context.Request.Query["rackId"]" />
+        <input type="hidden" name="LevelId" value="@Context.Request.Query["levelId"]" />
+        <div class="content-header clearfix">
+            <h1 class="float-left">
+                @T("Admin.Catalog.Categories.Products.AddNew")
+            </h1>
+            <div class="float-right">
+                &nbsp;
+            </div>
+        </div>
+        <section class="content">
+            <div class="container-fluid">
+                <div class="form-horizontal">
+                    <div class="cards-group">
+                        <div class="card card-default card-search card-popup">
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-sm-6">
+                                        <div class="form-group row">
+                                            <div class="col-sm-5">
+                                                <nop-label asp-for="SearchProductName" />
+                                            </div>
+                                            <div class="col-sm-7">
+                                                <nop-editor asp-for="SearchProductName" />
+                                            </div>
+                                        </div>
+                                        <div class="form-group row" @(Model.AvailableCategories.SelectionIsNotPossible() ? Html.Raw("style=\"display:none\"") : null)>
+                                            <div class="col-sm-5">
+                                                <nop-label asp-for="SearchCategoryId" />
+                                            </div>
+                                            <div class="col-sm-7">
+                                                <nop-select asp-for="SearchCategoryId" asp-items="Model.AvailableCategories" />
+                                            </div>
+                                        </div>
+                                        <div class="form-group row" @(Model.AvailableVendors.SelectionIsNotPossible() ? Html.Raw("style=\"display:none\"") : null)>
+                                            <div class="col-sm-5">
+                                                <nop-label asp-for="SearchVendorId" />
+                                            </div>
+                                            <div class="col-sm-7">
+                                                <nop-select asp-for="SearchVendorId" asp-items="Model.AvailableVendors" />
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-6">
+                                        <div class="form-group row" @(Model.AvailableStores.SelectionIsNotPossible() ? Html.Raw("style=\"display:none\"") : null)>
+                                            <div class="col-sm-5">
+                                                <nop-label asp-for="SearchStoreId" />
+                                            </div>
+                                            <div class="col-sm-7">
+                                                <nop-select asp-for="SearchStoreId" asp-items="Model.AvailableStores" />
+                                            </div>
+                                        </div>
+                                        <div class="form-group row">
+                                            <div class="col-sm-5">
+                                                <nop-label asp-for="SearchProductTypeId" />
+                                            </div>
+                                            <div class="col-sm-7">
+                                                <nop-select asp-for="SearchProductTypeId" asp-items="Model.AvailableProductTypes" />
+                                            </div>
+                                        </div>
+                                        <div class="form-group row" @(Model.AvailableManufacturers.SelectionIsNotPossible() ? Html.Raw("style=\"display:none\"") : null)>
+                                            <div class="col-sm-5">
+                                                <nop-label asp-for="SearchManufacturerId" />
+                                            </div>
+                                            <div class="col-sm-7">
+                                                <nop-select asp-for="SearchManufacturerId" asp-items="Model.AvailableManufacturers" />
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-sm-12">
+                                        <button type="button" id="search-products" class="btn btn-primary btn-search">
+                                            <i class="fas fa-magnifying-glass"></i>
+                                            @T("Admin.Common.Search")
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="card card-default">
+                            <div class="card-body">
+                                
+                                @await Html.PartialAsync("Table", new DataTablesModel
+                                {
+                                    Name = "rack-products-grid",
+                                    UrlRead = new DataUrl("RackProductAddPopupList", "Rack", null),
+                                    SearchButtonId = "search-products",
+                                    Length = Model.PageSize,
+                                    LengthMenu = Model.AvailablePageSizes,
+                                    Filters = new List<FilterParameter>
+                                    {
+                                        new FilterParameter(nameof(Model.SearchProductName)),
+                                        new FilterParameter(nameof(Model.SearchCategoryId)),
+                                        new FilterParameter(nameof(Model.SearchManufacturerId)),
+                                        new FilterParameter(nameof(Model.SearchStoreId)),
+                                        new FilterParameter(nameof(Model.SearchVendorId)),
+                                        new FilterParameter(nameof(Model.SearchProductTypeId))
+                                    },
+                                    ColumnCollection = new List<ColumnProperty>
+                                    {
+                                        new ColumnProperty(nameof(ProductModel.Id))
+                                        {
+                                            IsMasterCheckBox = true,
+                                            Render = new RenderCheckBox("SelectedProductIds"),
+                                            ClassName = NopColumnClassDefaults.CenterAll,
+                                            Width = "50"
+                                        },
+                                        new ColumnProperty(nameof(ProductModel.Sku))
+                                        {
+                                            Title = T("Admin.Catalog.Products.Fields.Name").Text
+                                        },
+
+                                        new ColumnProperty(nameof(ProductModel.Id))
+                                        {
+                                            Title = "Product Position",
+                                            Width = "200",
+                                            ClassName = NopColumnClassDefaults.CenterAll,
+                                            Render = new RenderCustom("renderPositionDropdown")
+                                        },
+                                        
+                                        new ColumnProperty(nameof(ProductModel.Published))
+                                        {
+                                            Title = T("Admin.Catalog.Products.Fields.Published").Text,
+                                            Width = "100",
+                                            ClassName = NopColumnClassDefaults.CenterAll,
+                                         Render = new RenderBoolean()
+                                        }
+                                    }
+                                })
+                        </div>
+                        <div class="card-footer">
+                            <button type="submit" name="save" class="btn btn-primary">
+                                <i class="far fa-floppy-disk"></i>
+                                @T("Admin.Common.Save")
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</form>
+<script>
+
+    var productPositions =
+        @Html.Raw(JsonSerializer.Serialize(
+                        addModel.AvailableProductPositions.Select(x => new
+                        {
+                                value = x.Value,
+                                text = x.Text
+                        })));
+
+        function renderPositionDropdown(data, type, row, meta) {
+
+        let options = '';
+
+        productPositions.forEach(function (item) {
+
+            options += `
+                <option value="${item.value}">
+                    ${item.text}
+                </option>
+            `;
+        });
+
+        return `
+            <select name="ProductPositions[${row.Id}]"
+                    class="form-control">
+
+                ${options}
+
+            </select>
+        `;
+    }
+
+</script>
+}

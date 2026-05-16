@@ -1,0 +1,27 @@
+@model RackModel
+
+@{
+    const string hideInfoBlockAttributeName = "RackPage.HideInfo";
+}
+
+<div asp-validation-summary="All"></div>
+<input asp-for="Id" type="hidden" />
+
+<section class="content">
+    <div class="container-fluid">
+        <div class="form-horizontal">
+
+            <nop-cards id="rack-cards">
+                <nop-card asp-name="rack-info"
+                          asp-icon="fas fa-info"
+                          asp-title="Rack Info"
+                          asp-hide-block-attribute-name="@hideInfoBlockAttributeName"
+                          asp-hide="false"
+                          asp-advanced="false">
+
+                    @await Html.PartialAsync("~/Plugins/Misc.CountingSequence/Views/Rack/_CreateOrUpdate.Info.cshtml", Model)
+                </nop-card>
+            </nop-cards> 
+        </div>
+    </div>
+</section>

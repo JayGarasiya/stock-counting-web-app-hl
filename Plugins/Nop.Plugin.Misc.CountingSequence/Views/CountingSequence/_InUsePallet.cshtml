@@ -1,0 +1,116 @@
+@model IList<PalletModel>
+
+<div class="modal-header">
+    <h5 class="modal-title">
+        @T("Plugins.Misc.CountingSequence.InUsePallet")
+    </h5>
+    <button type="button" class="close" data-dismiss="modal">&times;</button>
+</div>
+
+<div class="modal-body">
+    <table class="table table-bordered table-hover pallet-table">
+        <tbody id="palletTableBody">
+            @if(Model != null && Model.Count > 0)
+            {
+                @foreach (var pallet in Model)
+                {
+                    <tr>
+                        <td>
+                            <label class="warehouse_label">
+                                <input type="checkbox" name="selectedPallet" value="@pallet.Id" data-name="@pallet.Name" />
+                                <p>
+                                    @pallet.Name
+                                </p>
+                            </label>
+                        </td>
+                    </tr>
+                }
+            }
+            else
+            {
+                <tr>
+                    <td>
+                        <label class="warehouse_label">
+                            <p>@T("Plugins.Misc.CountingSequence.Pallet.NoRecords")</p>
+                        </label>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+<div class="modal-footer">
+    <button type="button" class="btn btn-secondary" data-dismiss="modal">
+        @T("Admin.Common.Cancel")
+    </button>
+
+    <button type="button" class="btn btn-primary" onclick="createPalletCounting()">
+        @T("Plugins.Misc.CountingSequence.Create.Pallet")
+    </button>
+</div>
+
+<script>
+    function createPalletCounting() {
+
+        var selected = $("input[name='selectedPallet']:checked");
+        $("#palletTableBody .error-row").remove();
+
+        var warehouseId = parseInt($("#warehouseId").val(), 10);
+
+        // Validate stockCountId (integer)
+        if (!warehouseId || warehouseId <= 0) {
+            var errorRow = `
+                <tr class="error-row">
+                    <td colspan="2" class="text-center text-danger">
+                        @T("Plugins.Misc.CountingSequence.InValidStockCount")
+                    </td>
+                </tr>`;
+
+            $("#palletTableBody").prepend(errorRow);
+            return;
+        }
+
+        //Validate selection
+        // if (selected.length === 0) {
+        //     var errorRow = `
+        //         <tr class="error-row">
+        //             <td colspan="2" class="text-center text-danger">
+        //                 @T("Plugins.Misc.CountingSequence.InUsePallet.Required")
+        //             </td>
+        //         </tr>`;
+
+        //     $("#palletTableBody").prepend(errorRow);
+        //     return;
+        // }
+        var selectedShipmentDispatchIds = $("input[name='selectedShipmentDispatchIds']:checked");
+
+        // collect IDs
+        var shipmentDispatchIds = selectedShipmentDispatchIds.map(function () {
+            return $(this).val();
+        }).get();
+
+
+        var palletIds = [];
+        selected.each(function () {
+            palletIds.push($(this).val());
+        });
+
+        var postData = {
+                palletIds: palletIds,
+                shipmentDispatchIds: shipmentDispatchIds,
+                warehouseId: warehouseId,
+        };
+        addAntiForgeryToken(postData);
+
+        $.ajax({
+            cache: false,
+            url: "@(Url.Action("InUsePallet", "CountingSequence"))",
+            type: 'POST',
+            data: postData,
+            success: function (result) {
+                window.location.href = result.redirectUrl;
+            }
+        });
+    }
+</script>

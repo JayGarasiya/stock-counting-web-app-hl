@@ -1,0 +1,188 @@
+﻿@model ShipmentTransitItemModel
+
+<form asp-action="AddItem" method="post" onsubmit="return saveItems(this);">
+
+    <div class="modal-header">
+        <h5 class="modal-title">
+            @T("Plugins.Misc.CountingSequence.ShipmebtTransitItemTitle")
+        </h5>
+        <button type="button" class="close" data-dismiss="modal">&times;</button>
+    </div>
+
+    <div class="modal-body">
+        <input type="hidden" asp-for="ShipmentTransitId" />
+        <div class="card-body">
+            <div class="form-group row justify-content-between align-items-center mb-3">
+                <div class="col-md-2 shipmenttransit_label">
+                    <nop-label asp-for="PalletId" />
+                </div>
+                <div class="col-md-10 shipmenttransit_dropdown">
+                    <nop-select asp-for="PalletId" asp-items="Model.AvailablePallets" class="form-control" />
+                    <span asp-validation-for="PalletId"></span>
+                </div>
+            </div>
+            <div class="form-group row">
+                <div class="col-md-12">
+                    <div class="table-scroll-wrapper warehouse_productTable">
+                        <table class="table table-bordered table-hover m-0" id="productTable">
+                            <thead>
+                                <tr>
+                                    <th style="width:40%">
+                                        @T("Plugins.Misc.CountingSequence.ShipmentTransitItem.Product")
+                                    </th>
+                                    <th style="width:15%">
+                                        @T("Plugins.Misc.CountingSequence.ShipmentTransitItem.NoOfPacks")
+                                    </th>
+                                    <th style="width:15%">
+                                        @T("Plugins.Misc.CountingSequence.ShipmentTransitItem.NoOfUnits")
+                                    </th>
+                                    <th style="width:35%">
+                                        @T("Plugins.Misc.CountingSequence.ShipmentTransitItem.HAndL")
+                                    </th>
+                                    <th style="width:10%"></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @for (int i = 0; i < Model.items.Count; i++)
+                                {
+                                    <tr>
+                                        <td>
+                                            <select name="items[@i].ProductId" class="form-control">
+                                                @foreach (var product in Model.AvailableProducts)
+                                                {
+                                                    <option value="@product.Value">@product.Text</option>
+                                                }
+                                            </select>
+                                        </td>
+
+                                        <td>
+                                            <input type="number" name="items[@i].NoOfPacks" class="form-control" value="0" min="0" />
+                                        </td>
+
+                                        <td>
+                                            <input type="number" name="items[@i].NoOfUnits" class="form-control" value="0" min="0" />
+                                        </td>
+
+                                        <td>
+                                            <select name="items[@i].HAndL" class="form-control">
+                                                @foreach (var item in Model.AvailableHAndL)
+                                                {
+                                                    <option value="@item.Value">@item.Text</option>
+                                                }
+                                            </select>
+                                        </td>
+
+                                        <td class="text-center">
+                                            <button type="button" class="btn btn-danger btn-sm" onclick="removeRow(this)">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                    <button type="button" class="btn btn-success mt-3" onclick="addRow()">
+                        <i class="fas fa-plus"></i>
+                        @T("Plugins.Misc.CountingSequence.AddMore")
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal-footer">
+        <button type="submit" class="btn btn-primary">
+            <i class="far fa-save"></i>
+            @T("Admin.Common.Save")
+        </button>
+    </div>
+</form>
+<script>
+    function addRow() {
+        var index = $('#productTable tbody tr').length;
+        var row = `
+        <tr>
+            <td>
+                <select name="items[${index}].ProductId" class="form-control">
+                    @foreach (var product in Model.AvailableProducts)
+                    {
+                            <text><option value="@product.Value">@product.Text</option></text>
+                    }
+                </select>
+            </td>
+
+            <td>
+                <input type="number" name="items[${index}].NoOfPacks" class="form-control" value="0" min="0" />
+            </td>
+
+            <td>
+                <input type="number" name="items[${index}].NoOfUnits" class="form-control" value="0" min="0" />
+            </td>
+
+            <td>
+               <select name="items[${index}].HAndL" class="form-control">
+                   @foreach (var item in Model.AvailableHAndL)
+                   {
+                           <text><option value="@item.Value">@item.Text</option></text>
+                   }
+               </select>
+            </td>
+
+            <td class="text-center">
+                <button type="button" class="btn btn-danger btn-sm" onclick="removeRow(this)">
+                    <i class="fas fa-trash"></i>
+                </button>
+            </td>
+        </tr>`;
+
+        $('#productTable tbody').append(row);
+    }
+
+    function removeRow(button) {
+        if ($('#productTable tbody tr').length > 1) {
+            $(button).closest('tr').remove();
+            resetIndexes();
+        }
+    }
+
+    function resetIndexes() {
+        $('#productTable tbody tr').each(function (i) {
+            $(this).find('select:eq(0)').attr('name', `items[${i}].ProductId`);
+            $(this).find('input:eq(1)').attr('name', `items[${i}].NoOfUnits`);
+            $(this).find('input:eq(2)').attr('name', `items[${i}].NoOfPacks`);
+            $(this).find('select:eq(1)').attr('name', `items[${i}].HAndL`);
+        });
+    }
+
+    function saveItems(form) {
+
+        let isValid = true;
+
+        $('#productTable tbody tr').each(function () {
+            let noOfPacks = parseInt($(this).find('input[name*=".NoOfPacks"]').val()) || 0;
+            let noOfUnits = parseInt($(this).find('input[name*=".NoOfUnits"]').val()) || 0;
+
+        if (noOfPacks === 0 && noOfUnits === 0) {
+            isValid = false;
+            return false;
+        }
+        });
+
+        if (!isValid) {
+            alert("Each row must have either NoOfPacks OR NoOfUnits");
+            return false;
+        }
+
+        $.post(form.action, $(form).serialize(), function (result) {
+            if (result.success) {
+                $('#shipmentTransitModal').modal('hide');
+                $("#pallet-grid").DataTable().ajax.reload();
+            } else {
+                alert(result.message || "Save failed");
+            }
+        });
+
+        return false;
+    }
+
+</script>

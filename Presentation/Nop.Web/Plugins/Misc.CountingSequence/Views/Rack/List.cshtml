@@ -1,0 +1,194 @@
+@model RackSearchModel
+
+@{
+    Layout = "_AdminLayout";
+    NopHtml.SetActiveMenuItemSystemName(CountingSequenceDefaults.CountingSequenceRack);
+}
+
+@{
+    const string hideSearchBlockAttributeName = "ProductListPage.HideSearchBlock";
+    var hideSearchBlock = await genericAttributeService.GetAttributeAsync<bool>(await workContext.GetCurrentCustomerAsync(), hideSearchBlockAttributeName);
+}
+
+@Html.AntiForgeryToken()
+<div class="content-header clearfix">
+    <h1 class="float-left"> @T("Plugins.Misc.CountingSequence.Racks")</h1>
+    <div class="float-right">
+        <a asp-action="Create" class="btn btn-primary">
+            <i class="fas fa-plus"></i> @T("Plugins.Misc.CountingSequence.CreateRack")
+        </a>
+    </div>
+</div>
+<section class="content">
+    <div class="container-fluid">
+        <div class="form-horizontal">
+            <div class="cards-group">
+                <div class="card card-default card-search">
+                    <div class="card-body">
+                        <div class="row search-row @(!hideSearchBlock ? "opened" : "")" data-hideAttribute="@hideSearchBlockAttributeName">
+                            <div class="search-text">@T("Admin.Common.Search")</div>
+                            <div class="icon-search"><i class="fas fa-magnifying-glass" aria-hidden="true"></i></div>
+                            <div class="icon-collapse"><i class="far fa-angle-@(!hideSearchBlock ? "up" : "down")" aria-hidden="true"></i></div>
+                        </div>
+
+                        <div class="search-body @(hideSearchBlock ? "closed" : "")">
+                            <div class="row">
+                                <div class="col-md-5">
+                                    <div class="form-group row">
+                                        <div class="col-md-4">
+                                            <nop-label asp-for="SearchRackName" />
+                                        </div>
+                                        <div class="col-md-8">
+                                            <nop-editor asp-for="SearchRackName" />
+                                        </div>
+                                    </div>
+                                    <div class="form-group row">
+                                        <div class="col-md-4">
+                                            <nop-label asp-for="SearchProductId" />
+                                        </div>
+                                        <div class="col-md-8">
+                                            <input type="text" id="search-product-name" autocomplete="off" class="form-control" />
+                                            <span id="search-product-friendly-name"></span>
+                                            <button type="button" id="search-product-clear" class="btn bg-gray" style="display: none; margin-top: 5px;">@T("Admin.Common.Clear")</button>
+                                            <input asp-for="SearchProductId" autocomplete="off" style="display: none;" />
+                                            <script>
+                                                $(function() {
+                                                    $('#search-product-name').autocomplete({
+                                                        delay: 500,
+                                                        minLength: 3,
+                                                        source: '@Url.Action("SearchProductSku", "Rack")',
+                                                        select: function(event, ui) {
+                                                            $('#@Html.IdFor(model => model.SearchProductId)').val(ui.item.productid);
+                                                            $('#search-product-friendly-name').text(ui.item.label);
+
+                                                            $('#search-product-clear').show();
+                                                            return false;
+                                                        }
+                                                    });
+
+                                                    //remove button
+                                                    $('#search-product-clear').click(function() {
+                                                        $('#@Html.IdFor(model => model.SearchProductId)').val('0');
+                                                        $('#search-product-friendly-name').text('');
+                                                        $('#search-product-clear').hide();
+                                                        return false;
+                                                    });
+                                                });
+                                            </script>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-7">
+                                    <div class="form-group row">
+                                        <div class="col-md-4">
+                                            <nop-label asp-for="SearchVisible" />
+                                        </div>
+                                        <div class="col-md-8">
+                                            <nop-select asp-for="SearchVisible" asp-items="Model.AvailableVisibleOptions" />
+                                        </div>
+                                    </div>
+                                    <div class="form-group row">
+                                        <div class="col-md-4">
+                                            <nop-label asp-for="SearchFunctionTypeId" />
+                                        </div>
+                                        <div class="col-md-8">
+                                            <nop-select asp-for="SearchFunctionTypeId" asp-items="Model.AvailableFunctionType" />
+                                        </div>
+                                    </div>
+                                    <div class="form-group row">
+                                        <div class="col-md-4">
+                                            <nop-label asp-for="SearchLevelTypeId" />
+                                        </div>
+                                        <div class="col-md-8">
+                                            <nop-select asp-for="SearchLevelTypeId" asp-items="Model.AvailableLevelTypes" />
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-group row">
+                                <div class="text-center col-12">
+                                    <button type="button" id="search-rack" class="btn btn-primary btn-search">
+                                        <i class="fas fa-magnifying-glass"></i>
+                                        @T("Admin.Common.Search")
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-body">
+                    @await Html.PartialAsync("Table", new DataTablesModel
+                    {
+                         Name = "rack-grid",
+                         UrlRead = new DataUrl("RackList", "Rack", null),
+                         PrimaryKeyColumn = nameof(RackModel.Id),
+                         SearchButtonId = "search-rack",
+                         Length = Model.PageSize,
+                         LengthMenu = Model.AvailablePageSizes,
+                         Filters = new List<FilterParameter>
+                        {
+                            new FilterParameter(nameof(Model.SearchRackName)),
+                            new FilterParameter(nameof(Model.SearchProductId)),
+                            new FilterParameter(nameof(Model.SearchVisible)),
+                            new FilterParameter(nameof(Model.SearchFunctionTypeId)),
+                            new FilterParameter(nameof(Model.SearchLevelTypeId)),
+                        },
+
+                         ColumnCollection = new List<ColumnProperty>
+                         {
+                             new ColumnProperty(nameof(RackModel.Name))
+                             {
+                                Title = T("Plugins.Misc.CountingSequence.Rack.Fields.Name").Text,
+                                ClassName = NopColumnClassDefaults.CenterAll
+                             },
+                             new ColumnProperty(nameof(RackModel.Description))
+                             {
+                                Title = T("Plugins.Misc.CountingSequence.Rack.Fields.Description").Text,
+                                ClassName = NopColumnClassDefaults.CenterAll
+                             },
+                             new ColumnProperty(nameof(RackModel.SequenceOrder))
+                             {
+                                Title = T("Plugins.Misc.CountingSequence.Rack.Fields.SequenceOrder").Text,
+                                ClassName = NopColumnClassDefaults.CenterAll
+                             },
+                             new ColumnProperty(nameof(RackModel.LevelTypeName))
+                             {
+                                Title = T("Plugins.Misc.CountingSequence.Rack.Fields.LevelTypeId").Text,
+                                ClassName = NopColumnClassDefaults.CenterAll
+                             },
+                             new ColumnProperty(nameof(RackModel.DisplayOrder))
+                             {
+                                Title = T("Plugins.Misc.CountingSequence.Rack.Fields.DisplayOrder").Text,
+                                ClassName = NopColumnClassDefaults.CenterAll
+                             },
+                             new ColumnProperty(nameof(RackModel.FunctionTypeName))
+                             {
+                                Title = T("Plugins.Misc.CountingSequence.Rack.Fields.FunctionTypeId").Text,
+                                ClassName = NopColumnClassDefaults.CenterAll
+                             },
+                             new ColumnProperty(nameof(RackModel.IsVisible))
+                             {
+                                Title = T("Plugins.Misc.CountingSequence.Rack.Fields.IsVisible").Text,
+                                ClassName = NopColumnClassDefaults.CenterAll,
+                                Render = new RenderBoolean()
+                             },
+                             new ColumnProperty(nameof(RackModel.Id))
+                             {
+                                Title = T("Admin.Common.Edit").Text,
+                                Width = "100",
+                                ClassName = NopColumnClassDefaults.Button,
+                                Render = new RenderButtonEdit(new DataUrl("Edit"))
+                             }
+                         }
+                    })
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+
+

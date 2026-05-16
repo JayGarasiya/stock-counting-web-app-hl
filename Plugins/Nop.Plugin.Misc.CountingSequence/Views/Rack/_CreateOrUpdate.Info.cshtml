@@ -1,0 +1,120 @@
+@model RackModel
+
+<div class="card-body">
+
+    <div class="form-group row">
+        <div class="col-md-3">
+            <nop-label asp-for="Name" />
+        </div>
+        <div class="col-md-9">
+            <nop-editor asp-for="Name" asp-required="true" />
+            <span asp-validation-for="Name"></span>
+        </div>
+    </div>
+
+    <div class="form-group row">
+        <div class="col-md-3">
+            <nop-label asp-for="Description" />
+        </div>
+        <div class="col-md-9">
+            <nop-editor asp-for="Description" />
+        </div>
+    </div>
+
+    <div class="form-group row">
+        <div class="col-md-3">
+            <nop-label asp-for="SequenceOrder" />
+        </div>
+        <div class="col-md-9">
+            <nop-editor asp-for="SequenceOrder" />
+        </div>
+    </div>
+
+    <div class="form-group row">
+        <div class="col-md-3">
+            <nop-label asp-for="DisplayOrder" />
+        </div>
+        <div class="col-md-9">
+            <nop-editor asp-for="DisplayOrder" />
+        </div>
+    </div>
+
+    <div class="form-group row">
+        <div class="col-md-3">
+            <nop-label asp-for="IsVisible" />
+        </div>
+        <div class="col-md-9">
+            <nop-editor asp-for="IsVisible" />
+        </div>
+    </div>
+
+    <div class="form-group row">
+        <div class="col-md-3">
+            <nop-label asp-for="FunctionTypeId" />
+        </div>
+        <div class="col-md-9">
+            <nop-select asp-for="FunctionTypeId"
+                        asp-items="Model.AvailableFunctionType" />
+        </div>
+    </div>  
+
+    <div class="form-group row">
+        <div class="col-md-3">
+            <nop-label asp-for="LevelTypeIds" />
+        </div>
+        <div class="col-md-9">
+            <nop-select asp-for="LevelTypeIds"
+                        asp-items="Model.AvailableLevelType"
+                        asp-multiple="true" />
+            <span asp-validation-for="LevelTypeIds"></span>
+        </div>
+    </div>
+</div>
+
+
+<script>
+    $(document).ready(function () {
+
+        // Store pre-selected level type ids from server (set by model)
+        var selectedLevelTypeIds = @Html.Raw(
+                        Newtonsoft.Json.JsonConvert.SerializeObject(Model.LevelTypeIds ?? new List<int>())
+                );
+
+        // Load level types immediately on page load
+        var defaultFunctionTypeId = $('#FunctionTypeId').val();
+        loadLevelTypes(defaultFunctionTypeId, selectedLevelTypeIds);
+
+        // Trigger on Function Type change
+        $('#FunctionTypeId').on('change', function () {
+            var functionTypeId = $(this).val();
+            loadLevelTypes(functionTypeId, []); // no pre-selection on manual change
+        });
+
+        function loadLevelTypes(functionTypeId, selectedIds) {
+            $.ajax({
+                url: '@Url.Action("GetLevelTypesByFunctionType", "Rack")',
+                type: 'GET',
+                data: { functionTypeId: functionTypeId },
+                success: function (data) {
+                    $('#LevelTypeIds').empty();
+
+                    $.each(data, function (i, item) {
+                        var option = $('<option>', {
+                            value: item.value,
+                            text: item.text
+                        });
+
+                        if (selectedIds && selectedIds.indexOf(parseInt(item.value)) !== -1) {
+                            option.attr('selected', 'selected');
+                        }
+
+                        $('#LevelTypeIds').append(option);
+                    });
+                },
+                error: function () {
+                    alert('Failed to load level types.');
+                }
+            });
+        }
+    });
+</script>

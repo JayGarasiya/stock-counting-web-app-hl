@@ -1,0 +1,38 @@
+﻿@model PalletModel
+
+@{
+    const string hideInfoBlockAttributeName = "PalletPage.HideInfo";
+    const string hideProductsBlockAttributeName = "PalletPage.HideProducts";
+}
+
+<div asp-validation-summary="All"></div>
+<input asp-for="Id" type="hidden" />
+
+<section class="content">
+    <div class="container-fluid">
+        <div class="form-horizontal">
+
+            <nop-cards id="pallet-cards">
+                <nop-card asp-name="pallet-info"
+                          asp-icon="fas fa-info"
+                          asp-title="Pallet Info"
+                          asp-hide-block-attribute-name="@hideInfoBlockAttributeName"
+                          asp-hide="false"
+                          asp-advanced="false">
+
+                    @await Html.PartialAsync("~/Plugins/Misc.CountingSequence/Views/Pallet/_CreateOrUpdate.Info.cshtml", Model)
+                </nop-card>
+
+                <nop-card asp-name="pallet-products"
+                          asp-icon="fas fa-box"
+                          asp-title="Products"
+                          asp-hide-block-attribute-name="@hideProductsBlockAttributeName"
+                          asp-hide="false"
+                          asp-advanced="false">
+                    @await Html.PartialAsync("~/Plugins/Misc.CountingSequence/Views/Pallet/_CreateOrUpdate.Products.cshtml", Model)
+                </nop-card>
+            </nop-cards>
+
+        </div>
+    </div>
+</section>

@@ -1,0 +1,34 @@
+﻿@inherits Nop.Web.Framework.Mvc.Razor.NopRazorPage<TModel>
+
+@inject INopUrlHelper NopUrl
+@inject INopHtmlHelper NopHtml
+@inject IGenericAttributeService genericAttributeService
+@inject IWorkContext workContext
+
+@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+@addTagHelper *, Nop.Web.Framework
+
+@using Microsoft.AspNetCore.Routing
+@using Nop.Plugin.Misc.CountingSequence
+@using Nop.Web.Framework
+@using Nop.Web.Framework.Mvc.Routing
+@using Nop.Web.Framework.UI
+@using Nop.Web.Framework.Extensions
+@using Nop.Web.Framework.Models
+@using Nop.Web.Areas.Admin.Components
+@using Nop.Plugin.Misc.CountingSequence.Models
+@using Nop.Plugin.Misc.CountingSequence.Models.Pallet
+@using Nop.Web.Framework.Models.DataTables
+@using Nop.Plugin.Misc.CountingSequence.Models.CountingSequence
+@using Nop.Plugin.Misc.CountingSequence.Models.Rack
+@using Nop.Core.Domain.Shipping
+@using Nop.Plugin.Misc.CountingSequence.Models.History
+@using Nop.Plugin.Misc.CountingSequence.Models.Stock
+@using Nop.Plugin.Misc.CountingSequence.Models.ShipmentDispatch
+@using Nop.Plugin.Misc.CountingSequence.Models.ShipmentTransit
+@using Nop.Plugin.Misc.CountingSequence.Models.Channel
+@using Nop.Plugin.Misc.CountingSequence.Models.ShipmentTransitItem
+@using Nop.Plugin.Misc.CountingSequence.Models.BackOrders
+@using Nop.Web.Areas.Admin.Models.Catalog
+@using Nop.Core
+@using Nop.Services.Common

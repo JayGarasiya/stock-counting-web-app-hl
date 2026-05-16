@@ -1,0 +1,123 @@
+﻿@model IList<Warehouse>
+
+<div class="modal-header">
+    <h5 class="modal-title">
+        @T("Plugins.Misc.CountingSequence.StartNewCount")
+    </h5>
+    <button type="button" class="close" data-dismiss="modal">&times;</button>
+</div>
+
+<div class="modal-body">
+    <div class="form-group">
+        <input type="text" id="warehouseSearch" class="form-control warehouse-form-control" placeholder="Search warehouse..." />
+    </div>
+    <table class="table table-bordered table-hover warehouse-table">
+        <tbody id="warehouseTableBody">
+            @foreach (var warehouse in Model)
+            {
+                <tr>
+                    <td>
+                        <label class="warehouse_label">
+                            <input type="radio" name="selectedWarehouse" value="@warehouse.Id" data-name="@warehouse.Name" />
+                            <p>@warehouse.Name</p>
+                        </label>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+<div class="modal-footer">
+    <button type="button" class="btn btn-secondary" data-dismiss="modal">
+        @T("Admin.Common.Cancel")
+    </button>
+
+    <button type="button" class="btn btn-primary" onclick="createCount()">
+        @T("Plugins.Misc.CountingSequence.Create")
+    </button>
+</div>
+
+<script>
+    $(document).on("keyup", "#warehouseSearch", function () {
+        var value = $(this).val();
+
+        if(value.length > 2 )
+        {
+            $.get('@Url.Action("WarehousesPopupSearch", "CountingSequence")',
+                { searchName: value },
+                function (data) {
+                    var rows = "";
+                    if (data.length === 0) {
+                        rows = '<tr><td colspan="2" class="text-center">@T("Plugins.Misc.CountingSequence.Warehouse.NotFound")</td></tr>';
+                    }
+                    else {
+                        $.each(data, function (i, item) {
+                            rows += '<tr>' +
+                                '<td><input type="radio" name="selectedWarehouse" value="' + item.Id + '" data-name="' + item.Name + '" /></td>' +
+                                '<td>' + item.Name + '</td>' +
+                                '</tr>';
+                        });
+                    }
+                    $("#warehouseTableBody").html(rows);
+                }
+            );
+        }
+    });
+
+    function createCount() {
+        var selected = $("input[name='selectedWarehouse']:checked");
+
+        if (selected.length === 0) {
+            $(".error-row").remove();
+            $("#warehouseTableBody").prepend(`
+                <tr class="error-row">
+                    <td colspan="2" class="text-danger text-center">
+                        Warehouse is required
+                    </td>
+                </tr>`);
+            return;
+        }
+
+        var warehouseId = selected.val();
+
+        $.ajax({
+            url: '@Url.Action("StartCount", "CountingSequence")',
+            type: 'GET',
+            data: { warehouseId: warehouseId },
+            success: function (response) {
+
+                if (response.success) {
+
+                    // RACK FLOW
+                    if (!response.isPallet && response.redirectUrl) {
+                        window.location.href = response.redirectUrl;
+                        return;
+                    }
+
+                    // PALLET FLOW
+                    if (response.isPallet && response.warehouseId) {
+                        $('#warehouseModal').modal('hide');
+
+                        $("#warehouseId").val(response.warehouseId);
+                        window.selectedWarehouseId = response.warehouseId;
+
+                        openShipmentPopup(response.warehouseId);
+                    }
+                }
+                else {
+                    $(".error-row").remove();
+
+                    $("#warehouseTableBody").prepend(`
+                        <tr class="error-row">
+                            <td colspan="2" class="text-danger text-center">
+                                ${response?.error || 'Incomplete Count Exist.'}
+                            </td>
+                        </tr>
+                    `);
+                }
+            }
+        });
+    }
+</script>
+

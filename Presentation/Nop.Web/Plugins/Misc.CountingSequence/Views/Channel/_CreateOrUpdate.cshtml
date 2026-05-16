@@ -1,0 +1,71 @@
+﻿@model ChannelModel
+
+<form asp-action="@(Model.Id == 0 ? "Create" : "Edit")" method="post" onsubmit="return saveChannel(this);">
+    <div class="modal-header">
+        <h5 class="modal-title">
+            @(Model.Id == 0 ? T("Plugins.Misc.CountingSequence.CreateChannel") : T("Plugins.Misc.CountingSequence.EditChannel"))
+        </h5>
+        <button type="button" class="close" data-dismiss="modal">&times;</button>
+    </div>
+    <div class="modal-body">
+        <input asp-for="Id" type="hidden" />
+        <div class="form-group row">
+            <div class="col-md-3">
+                <nop-label asp-for="Name" />
+            </div>
+            <div class="col-md-9">
+                <nop-editor asp-for="Name" asp-required="true"/>
+                <span asp-validation-for="Name"></span>
+            </div>
+        </div>
+        <div class="form-group row">
+            <div class="col-md-3">
+                <nop-label asp-for="Description" />
+            </div>
+            <div class="col-md-9">
+                <nop-textarea asp-for="Description"></nop-textarea>
+                <span asp-validation-for="Description"></span>
+            </div>
+        </div>
+
+        <div class="form-group row">
+            <div class="col-md-3">
+                <nop-label asp-for="ChannelId" />
+            </div>
+            <div class="col-md-9">
+                <nop-select asp-for="ChannelId"
+                            asp-items="Model.AvailableChannelTypes" />
+                <span asp-validation-for="ChannelId"></span>
+            </div>
+        </div>
+
+        <div class="form-group row">
+            <div class="col-md-3">
+                <nop-label asp-for="DisplayOrder" />
+            </div>
+            <div class="col-md-9">
+                <nop-editor asp-for="DisplayOrder" />
+                <span asp-validation-for="DisplayOrder"></span>
+            </div>
+        </div>
+
+        <div class="form-group row">
+            <div class="col-md-3">
+                <nop-label asp-for="Visible" />
+            </div>
+            <div class="col-md-9">
+                <nop-editor asp-for="Visible" />
+                <span asp-validation-for="Visible"></span>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-footer">
+        <button type="submit" class="btn btn-primary">
+            @T("Admin.Common.Save")
+        </button>
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">
+            @T("Admin.Common.Cancel")
+        </button>
+    </div>
+</form>

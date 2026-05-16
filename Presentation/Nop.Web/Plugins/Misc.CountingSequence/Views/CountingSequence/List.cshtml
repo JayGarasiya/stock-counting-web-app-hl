@@ -1,0 +1,275 @@
+﻿@using Nop.Plugin.Misc.CountingSequence
+@model StockCountSearchModel
+
+@{
+    Layout = "_AdminLayout";
+    NopHtml.SetActiveMenuItemSystemName(CountingSequenceDefaults.CountingSequence);
+}
+@{
+    const string hideSearchBlockAttributeName = "CountingSequencePage.HideSearchBlock";
+    var hideSearchBlock = await genericAttributeService.GetAttributeAsync<bool>(await workContext.GetCurrentCustomerAsync(), hideSearchBlockAttributeName);
+}
+
+
+<form asp-controller="CountingSequence" asp-action="List" method="post">
+    <div class="content-header clearfix">
+        <h1 class="float-left">
+            @T("Plugins.Misc.CountingSequence.StartCounting")
+        </h1>
+        <div class="float-right">
+            <div class="float-right">
+                <button type="button" class="btn btn-primary" onclick="openWarehousePopup()">
+                    <i class="fas fa-plus"></i>
+                    @T("Plugins.Misc.CountingSequence.NewCount")
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <section class="content">
+        <div class="container-fluid">
+            <div class="form-horizontal">
+                <div class="cards-group">
+                    <div class="card card-default card-search">
+                        <div class="card-body">
+                            <div class="row search-row @(!hideSearchBlock ? "opened" : "")" data-hideAttribute="@hideSearchBlockAttributeName">
+                                <div class="search-text">@T("Admin.Common.Search")</div>
+                                <div class="icon-search"><i class="fas fa-magnifying-glass" aria-hidden="true"></i></div>
+                                <div class="icon-collapse"><i class="far fa-angle-@(!hideSearchBlock ? "up" : "down")" aria-hidden="true"></i></div>
+                            </div>
+
+                            <div class="search-body @(hideSearchBlock ? "closed" : "")">
+                                <div class="row">
+                                    <div class="col-md-5">
+                                        <div class="form-group row">
+                                            <div class="col-md-4">
+                                                <nop-label asp-for="SearchName" />
+                                            </div>
+                                            <div class="col-md-8">
+                                                <nop-editor asp-for="SearchName" />
+                                            </div>
+                                        </div>
+
+                                        <div class="form-group row">
+                                            <div class="col-md-4">
+                                                <nop-label asp-for="SearchWarehouseId" />
+                                            </div>
+                                            <div class="col-md-8">
+                                                <nop-select asp-for="SearchWarehouseId" asp-items="Model.AvailableWarehouse" />
+                                            </div>
+                                        </div>
+
+                                        <div class="form-group row">
+                                            <div class="col-md-4">
+                                                <nop-label asp-for="SearchCountTypeId" />
+                                            </div>
+                                            <div class="col-md-8">
+                                                <nop-select asp-for="SearchCountTypeId" asp-items="Model.AvailableCountType" />
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-7">
+                                        <div class="form-group row">
+                                            <div class="col-md-4">
+                                                <nop-label asp-for="SearchProgressStatusTypeId" />
+                                            </div>
+                                            <div class="col-md-8">
+                                                <nop-select asp-for="SearchProgressStatusTypeId" asp-items="Model.AvailableProgressStatusType" />
+                                            </div>
+                                        </div>
+
+                                        <div class="form-group row">
+                                            <div class="col-md-4">
+                                                <nop-label asp-for="SearchFromDate" />
+                                            </div>
+                                            <div class="col-md-8">
+                                                <nop-editor asp-for="SearchFromDate" />
+                                            </div>
+                                        </div>
+                                        <div class="form-group row">
+                                            <div class="col-md-4">
+                                                <nop-label asp-for="SearchToDate" />
+                                            </div>
+                                            <div class="col-md-8">
+                                                <nop-editor asp-for="SearchToDate" />
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="text-center col-12">
+                                        <button type="button" id="search-stockcount" class="btn btn-primary btn-search">
+                                            <i class="fas fa-magnifying-glass"></i>
+                                            @T("Admin.Common.Search")
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card card-default">
+                        <div class="card-body">
+                            @await Html.PartialAsync("Table", new DataTablesModel
+                            {
+                                Name = "stockcount-grid",
+                                                        UrlRead = new DataUrl("List", "CountingSequence", null),
+                                                        SearchButtonId = "search-stockcount",
+                                                        Length = Model.PageSize,
+                                                        LengthMenu = Model.AvailablePageSizes,
+                                                        Filters = new List<FilterParameter>
+                                                        {
+                                                        new FilterParameter(nameof(Model.SearchFromDate), typeof(DateTime?)),
+                                                        new FilterParameter(nameof(Model.SearchToDate), typeof(DateTime?)),
+                                                        new FilterParameter(nameof(Model.SearchName)),
+                                                        new FilterParameter(nameof(Model.SearchWarehouseId)),
+                                                        new FilterParameter(nameof(Model.SearchCountTypeId)),
+                                                        new FilterParameter(nameof(Model.SearchProgressStatusTypeId)),
+                                                        },
+                                                        ColumnCollection = new List<ColumnProperty>
+                                                        {
+                                                        new ColumnProperty(nameof(StockCountModel.Name))
+                                                        {
+                                                        Title = T("Plugins.Misc.CountingSequence.Stock.Fields.Name").Text,
+                                                        },
+                                                        new ColumnProperty(nameof(StockCountModel.WarehouseName))
+                                                        {
+                                                        Title = T("Plugins.Misc.CountingSequence.Stock.Fields.WarehouseName").Text,
+                                                        },
+                                                        new ColumnProperty(nameof(StockCountModel.CountType))
+                                                        {
+                                                        Title = T("Plugins.Misc.CountingSequence.Stock.Fields.CountType").Text,
+                                                        },
+                                                        new ColumnProperty(nameof(StockCountModel.CreatedOnUtc))
+                                                        {
+                                                        Title = T("Plugins.Misc.CountingSequence.Stock.Fields.CreatedOnUtc").Text,
+                                                        },
+                                                        new ColumnProperty(nameof(StockCountModel.ProgressStatusName))
+                                                        {
+                                                        Title = T("Plugins.Misc.CountingSequence.Stock.Fields.ProgressStatusName").Text,
+                                                        ClassName = NopColumnClassDefaults.CenterAll,
+                                                        Render = new RenderCustom("renderColumnProgressStatus")
+                                                        },
+                                                        new ColumnProperty(nameof(StockCountModel.Id))
+                                                        {
+                                                        Title = T("Admin.Common.Edit").Text,
+                                                        Width = "100",
+                                                        ClassName = NopColumnClassDefaults.Button,
+                                                        Render = new RenderButtonEdit(new DataUrl("Resume", "CountingSequence"))
+                                                        },
+                                                        new ColumnProperty(nameof(StockCountModel.Id))
+                                                        {
+                                                        Title = T("Admin.Common.Delete").Text,
+                                                        Width = "100",
+                                                        ClassName = NopColumnClassDefaults.Button,
+                                                        Render = new RenderCustom("renderDeleteButton")
+                                                        }
+                                                        }
+                                                        })
+                        </div>
+                    </div>
+
+                    <div class="modal fade warehouse_Modal" id="warehouseModal" tabindex="-1">
+                        <div class="modal-dialog modal-lg">
+                            <div class="modal-content" id="warehouseModalContent"> </div>
+                        </div>
+                    </div>
+
+                    <div class="modal fade" id="shipmentModal" tabindex="-1">
+                        <div class="modal-dialog modal-lg modal-dialog-scrollable">
+                            <div class="modal-content" id="shipmentModalContent"></div>
+                        </div>
+                    </div>
+
+                    <input type="hidden" id="warehouseId" />
+                    <div class="modal fade" id="inUsePalletModal" tabindex="-1">
+                        <div class="modal-dialog modal-lg modal-dialog-scrollable">
+                            <div class="modal-content" id="inUsePalletModalContent"></div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </section>
+
+</form>
+<script>
+    function renderDeleteButton(data, type, row, meta) {
+        // Adjust this depending on your actual status field/value
+        if (row.ProgressStatusId === 15) {
+            return ""; // hide delete button
+        }
+
+        return `<button type="button" class="btn btn-sm btn-danger" onclick="deleteCountRow(${data})"> Delete </button>`;
+    }
+
+    function deleteCountRow(id) {
+        if (!confirm('@T("Plugins.Misc.CountingSequence.Count.Delete.Warning")'))
+        return;
+
+        var postData = {
+            id : id
+        }
+        addAntiForgeryToken(postData);
+
+        $.ajax({
+            type: "POST",
+            url: '@Url.Action("DeleteCount", "CountingSequence")',
+            data: postData,
+            success: function (response) {
+                if (response.success) {
+                    let htmlcode = '<div class="alert alert-success alert-dismissable"><button class="close" data-dismiss="alert" aria-hidden="true">×</button><span> ' + response.message + ' </span></div>'
+                    $('#admin-notifications').append(htmlcode);
+                    updateTable('#stockcount-grid');
+                } else {
+                    alert('Delete failed');
+                }
+            },
+            error: function () {
+                alert('Error while deleting');
+            }
+        });
+    }
+
+    function renderColumnProgressStatus(data, type, row, meta) {
+        var color;
+        switch (row.ProgressStatusId) {
+        case 5:
+            color = 'yellow';
+            break;
+        case 10:
+            color = 'blue';
+            break;
+        case 15:
+            color = 'green';
+            break;
+        }
+        return '<span class="grid-report-item ' + color + '">' + data + '</span >';
+    }
+
+    function openWarehousePopup() {
+        $.get('@Url.Action("WarehousesPopup", "CountingSequence")',
+            function (data) {
+                $('#warehouseModalContent').html(data);
+                $('#warehouseModal').modal('show');
+            });
+    }
+
+    function openShipmentPopup(warehouseId) {
+        $.ajax({
+            url: '@Url.Action("ShipementDispatchPopup", "CountingSequence")',
+            type: 'GET',
+            traditional: true,
+            data: { warehouseId: warehouseId },
+            success: function (data) {
+                $('#shipmentModalContent').html(data);
+                $('#shipmentModal').modal('show');
+            },
+            error: function (err) {
+                console.error("Error loading pallet popup:", err);
+            }
+        });
+    }
+
+</script>

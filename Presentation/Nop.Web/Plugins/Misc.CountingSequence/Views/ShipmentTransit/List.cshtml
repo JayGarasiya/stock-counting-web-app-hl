@@ -1,0 +1,192 @@
+﻿@model ShipmentTransitSearchModel
+@{
+    Layout = "_AdminLayout";
+    NopHtml.SetActiveMenuItemSystemName(CountingSequenceDefaults.CountingSequenceShipmentTransit);
+}
+@{
+    const string hideSearchBlockAttributeName = "ProductListPage.HideSearchBlock";
+    var hideSearchBlock = await genericAttributeService.GetAttributeAsync<bool>(await workContext.GetCurrentCustomerAsync(), hideSearchBlockAttributeName);
+}
+
+
+@Html.AntiForgeryToken()
+<div class="content-header clearfix">
+    <h1 class="float-left">
+        @T("Plugins.Misc.CountingSequence.ShipmentTransit")
+    </h1>
+    <div class="float-right">
+        <a asp-action="Create" class="btn btn-primary">
+            <i class="fas fa-plus"></i>
+            @T("Plugins.Misc.CountingSequence.CreateShipmentTransit")
+            </a>
+    </div>
+</div>
+<section class="content">
+    <div class="container-fluid">
+        <div class="form-horizontal">
+            <div class="cards-group">
+                <div class="card card-default card-search">
+                    <div class="card-body">
+                        <div class="row search-row @(!hideSearchBlock ? "opened" : "")" data-hideAttribute="@hideSearchBlockAttributeName">
+                            <div class="search-text">@T("Admin.Common.Search")</div>
+                            <div class="icon-search"><i class="fas fa-magnifying-glass" aria-hidden="true"></i></div>
+                            <div class="icon-collapse"><i class="far fa-angle-@(!hideSearchBlock ? "up" : "down")" aria-hidden="true"></i></div>
+                        </div>
+                        <div class="search-body @(hideSearchBlock ? "closed" : "")">
+                            <div class="row">
+                                <div class="col-md-5">
+                                    <div class="form-group row">
+                                        <div class="col-md-4">
+                                            <nop-label asp-for="SearchPalletId" />
+                                        </div>
+                                        <div class="col-md-8">
+                                            <input type="text" id="search-pallet-name" autocomplete="off" class="form-control" />
+                                            <span id="search-pallet-friendly-name"></span>
+                                            <button type="button" id="search-pallet-clear" class="btn bg-gray" style="display: none; margin-top: 5px;">
+                                                @T("Admin.Common.Clear")
+                                            </button>
+
+                                            <input asp-for="SearchPalletId" autocomplete="off" style="display: none;" />
+
+                                            <script>
+                                                $(function () {
+                                                    $('#search-pallet-name').autocomplete({
+                                                        delay: 500,
+                                                        minLength: 2,
+                                                        source: '@Url.Action("SearchPalletAutoComplete", "Pallet")',
+                                                        select: function (event, ui) {
+                                                            $('#@Html.IdFor(model => model.SearchPalletId)').val(ui.item.palletid);
+                                                            $('#search-pallet-friendly-name').text(ui.item.label);
+                                                            $('#search-pallet-clear').show();
+                                                            return false;
+                                                        }
+                                                    });
+
+                                                    $('#search-pallet-clear').click(function () {
+                                                        $('#@Html.IdFor(model => model.SearchPalletId)').val('0');
+                                                        $('#search-pallet-friendly-name').text('');
+                                                        $('#search-pallet-clear').hide();
+                                                        return false;
+                                                    });
+                                                });
+                                            </script>
+                                        </div>
+                                    </div>
+                                    <div class="form-group row">
+                                        <div class="col-md-4">
+                                            <nop-label asp-for="SearchProductId" />
+                                        </div>
+                                        <div class="col-md-8">
+                                            <input type="text" id="search-product-name" autocomplete="off" class="form-control" />
+                                            <span id="search-product-friendly-name"></span>
+                                            <button type="button" id="search-product-clear" class="btn bg-gray" style="display: none; margin-top: 5px;">@T("Admin.Common.Clear")</button>
+                                            <input asp-for="SearchProductId" autocomplete="off" style="display: none;" />
+                                            <script>
+                                                $(function() {
+                                                    $('#search-product-name').autocomplete({
+                                                        delay: 500,
+                                                        minLength: 3,
+                                                        source: '@Url.Action("SearchProductSku", "Rack")',
+                                                        select: function(event, ui) {
+                                                            $('#@Html.IdFor(model => model.SearchProductId)').val(ui.item.productid);
+                                                            $('#search-product-friendly-name').text(ui.item.label);
+
+                                                            $('#search-product-clear').show();
+                                                            return false;
+                                                        }
+                                                    });
+
+                                                    //remove button
+                                                    $('#search-product-clear').click(function() {
+                                                        $('#@Html.IdFor(model => model.SearchProductId)').val('0');
+                                                        $('#search-product-friendly-name').text('');
+                                                        $('#search-product-clear').hide();
+                                                        return false;
+                                                    });
+                                                });
+                                            </script>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-7">
+                                    
+                                    <div class="form-group row">
+                                        <div class="col-md-4">
+                                            <nop-label asp-for="SearchFromDisptchId" />
+                                        </div>
+                                        <div class="col-md-8">
+                                            <nop-select asp-for="SearchFromDisptchId" asp-items="Model.AvailableFromDisptch" />
+                                        </div>
+                                    </div>
+                                    <div class="form-group row">
+                                        <div class="col-md-4">
+                                            <nop-label asp-for="SearchStatus" />
+                                        </div>
+                                        <div class="col-md-8">
+                                            <nop-select asp-for="SearchStatus" asp-items="Model.AvailableStatus" />
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-group row">
+                                <div class="text-center col-12">
+                                    <button type="button" id="search-shipment" class="btn btn-primary btn-search">
+                                        <i class="fas fa-magnifying-glass"></i>
+                                        @T("Admin.Common.Search")
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-body">
+                        @await Html.PartialAsync("Table", new DataTablesModel
+                        {
+                            Name = "shipment-transit-grid",
+                            UrlRead = new DataUrl("List", "ShipmentTransit", null),
+                            PrimaryKeyColumn = nameof(ShipmentTransitModel.Id),
+                            SearchButtonId = "search-shipment",
+                            Length = Model.PageSize,
+                            LengthMenu = Model.AvailablePageSizes,
+                            Filters = new List<FilterParameter>
+                            {
+                                 new FilterParameter(nameof(Model.SearchFromDisptchId)),
+                                 new FilterParameter(nameof(Model.SearchStatus)),
+                                 new FilterParameter(nameof(Model.SearchProductId)),
+                                 new FilterParameter(nameof(Model.SearchPalletId)),
+                            },
+                            ColumnCollection = new List<ColumnProperty>
+                                {
+                                new ColumnProperty(nameof(ShipmentTransitModel.FromDispatchName))
+                                {
+                                    Title = T("Plugins.Misc.CountingSequence.Fields.FromDispatchId").Text,
+                                    ClassName = NopColumnClassDefaults.CenterAll
+                                },
+
+                                new ColumnProperty(nameof(ShipmentTransitModel.StatusName))
+                                {
+                                    Title = T("Plugins.Misc.CountingSequence.Fields.ST.Status").Text,
+                                    ClassName = NopColumnClassDefaults.CenterAll
+                                },
+
+                                new ColumnProperty(nameof(ShipmentTransitModel.Id))
+                                {
+                                    Title = T("Admin.Common.Edit").Text,
+                                    Width = "100",
+                                    ClassName = NopColumnClassDefaults.Button,
+                                    Render = new RenderButtonEdit(new DataUrl("Edit"))
+                                }
+                            },
+                                
+                        })
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+
+

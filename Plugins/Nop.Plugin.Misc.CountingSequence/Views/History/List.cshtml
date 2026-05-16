@@ -1,0 +1,183 @@
+﻿@model HistorySearchModel
+
+@{
+    Layout = "_AdminLayout";
+    NopHtml.SetActiveMenuItemSystemName(CountingSequenceDefaults.CountingSequenceHistory);
+}
+
+@{
+    const string hideSearchBlockAttributeName = "ProductListPage.HideSearchBlock";
+    var hideSearchBlock = await genericAttributeService.GetAttributeAsync<bool>(await workContext.GetCurrentCustomerAsync(), hideSearchBlockAttributeName);
+}
+
+<div class="content-header clearfix">
+    <h1 class="float-left">
+        @T("Plugins.Misc.CountingSequence.History")
+    </h1>
+</div>
+<section class="content">
+    <div class="container-fluid">
+        <div class="form-horizontal">
+            <div class="cards-group">
+                <div class="card card-default card-search">
+                    <div class="card-body">
+                        <div class="row search-row @(!hideSearchBlock ? "opened" : "")" data-hideAttribute="@hideSearchBlockAttributeName">
+                            <div class="search-text">@T("Admin.Common.Search")</div>
+                            <div class="icon-search"><i class="fas fa-magnifying-glass" aria-hidden="true"></i></div>
+                            <div class="icon-collapse"><i class="far fa-angle-@(!hideSearchBlock ? "up" : "down")" aria-hidden="true"></i></div>
+                        </div>
+
+                        <div class="search-body @(hideSearchBlock ? "closed" : "")">
+                            <div class="row">
+                                <div class="col-md-5">
+                                    
+                                    <div class="form-group row">
+                                        <div class="col-md-4">
+                                            <nop-label asp-for="SearchProductId" />
+                                        </div>
+                                        <div class="col-md-8">
+                                            <input type="text" id="search-product-name" autocomplete="off" class="form-control" />
+                                            <span id="search-product-friendly-name"></span>
+                                            <button type="button" id="search-product-clear" class="btn bg-gray" style="display: none; margin-top: 5px;">@T("Admin.Common.Clear")</button>
+                                            <input asp-for="SearchProductId" autocomplete="off" style="display: none;" />
+                                            <script>
+                                                $(function() {
+                                                    $('#search-product-name').autocomplete({
+                                                        delay: 500,
+                                                        minLength: 3,
+                                                        source: '@Url.Action("SearchProductSku", "Rack")',
+                                                        select: function(event, ui) {
+                                                            $('#@Html.IdFor(model => model.SearchProductId)').val(ui.item.productid);
+                                                            $('#search-product-friendly-name').text(ui.item.label);
+
+                                                            $('#search-product-clear').show();
+                                                            return false;
+                                                        }
+                                                    });
+
+                                                    //remove button
+                                                    $('#search-product-clear').click(function() {
+                                                        $('#@Html.IdFor(model => model.SearchProductId)').val('0');
+                                                        $('#search-product-friendly-name').text('');
+                                                        $('#search-product-clear').hide();
+                                                        return false;
+                                                    });
+                                                });
+                                            </script>
+                                        </div>
+                                    </div>
+                                    <div class="form-group row">
+                                        <div class="col-md-4">
+                                            <nop-label asp-for="SearchMonth" />
+                                        </div>
+                                        <div class="col-md-8">
+                                            <nop-editor asp-for="SearchMonth" />
+                                        </div>
+                                    </div>
+                                    <div class="form-group row">
+                                        <div class="col-md-4">
+                                            <nop-label asp-for="SearchYear" />
+                                        </div>
+                                        <div class="col-md-8">
+                                            <nop-editor asp-for="SearchYear" />
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-7">
+                                    <div class="form-group row">
+                                        <div class="col-md-4">
+                                            <nop-label asp-for="SearchOfUnit" />
+                                        </div>
+                                        <div class="col-md-8">
+                                            <nop-editor asp-for="SearchOfUnit" />
+                                        </div>
+                                    </div>
+                                    <div class="form-group row">
+                                        <div class="col-md-4">
+                                            <nop-label asp-for="SearchShipment" />
+                                        </div>
+                                        <div class="col-md-8">
+                                            <nop-select asp-for="SearchShipment" asp-items="Model.AvailableShipment" />
+                                        </div>
+                                    </div>
+                                    
+                                </div>
+                            </div>
+                            <div class="form-group row">
+                                <div class="text-center col-12">
+                                    <button type="button" id="search-history" class="btn btn-primary btn-search">
+                                        <i class="fas fa-magnifying-glass"></i>
+                                        @T("Admin.Common.Search")
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-body">
+
+                    @await Html.PartialAsync("Table", new DataTablesModel
+                    {
+                        Name = "warehouse-stock-history-grid",
+                        UrlRead = new DataUrl("List", "History", null),
+                        SearchButtonId = "search-history",
+                        Length = Model.PageSize,
+                        LengthMenu = Model.AvailablePageSizes,
+                        Filters = new List<FilterParameter>
+                        {
+                            new FilterParameter(nameof(Model.SearchProductId)),
+                            new FilterParameter(nameof(Model.SearchMonth)),
+                            new FilterParameter(nameof(Model.SearchYear)),
+                            new FilterParameter(nameof(Model.SearchOfUnit)),
+                            new FilterParameter(nameof(Model.SearchShipment )),
+                            
+                        },
+
+                        ColumnCollection = new List<ColumnProperty>
+                        {
+                            new ColumnProperty(nameof(HistoryModel.ProductName))
+                            {
+                                Title = T("Plugins.Misc.CountingSequence.History.Fields.Product").Text,
+                                ClassName = NopColumnClassDefaults.CenterAll,
+                            },
+                            new ColumnProperty(nameof(HistoryModel.Month))
+                            {
+                                Title = T("Plugins.Misc.CountingSequence.History.Fields.Month").Text,
+                                ClassName = NopColumnClassDefaults.CenterAll,
+                            },
+                            new ColumnProperty(nameof(HistoryModel.Year))
+                            {
+                                Title = T("Plugins.Misc.CountingSequence.History.Fields.Year").Text,
+                                ClassName = NopColumnClassDefaults.CenterAll,
+                            },
+                            new ColumnProperty(nameof(HistoryModel.Type))
+                            {
+                                Title = T("Plugins.Misc.CountingSequence.History.Fields.Type").Text,
+                                ClassName = NopColumnClassDefaults.CenterAll,
+                            },
+                            new ColumnProperty(nameof(HistoryModel.QuantityAdjustment))
+                            {
+                                Title = T("Plugins.Misc.CountingSequence.History.Fields.OfUnits").Text,
+                                ClassName = NopColumnClassDefaults.CenterAll,
+                            },
+                            new ColumnProperty(nameof(HistoryModel.USShipmentName))
+                            {
+                                Title = T("Plugins.Misc.CountingSequence.History.Fields.Us").Text,
+                                ClassName = NopColumnClassDefaults.CenterAll,
+                            },
+                            new ColumnProperty(nameof(HistoryModel.HLShipmentName))
+                            {
+                                Title = T("Plugins.Misc.CountingSequence.History.Fields.HL").Text,
+                                ClassName = NopColumnClassDefaults.CenterAll,
+
+                            },
+                        }
+                    })
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+

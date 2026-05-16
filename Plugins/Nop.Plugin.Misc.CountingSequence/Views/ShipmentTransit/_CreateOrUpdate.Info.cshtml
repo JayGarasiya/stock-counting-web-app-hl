@@ -1,0 +1,36 @@
+@model ShipmentTransitModel
+
+<div class="card-body">
+    <div class="form-group row">
+        <div class="col-md-3">
+            <nop-label asp-for="FromDispatchId" />
+        </div>
+        <div class="col-md-9">
+            <nop-select asp-for="FromDispatchId"
+                        asp-items="Model.AvailableFromDispatches" />
+            <span asp-validation-for="FromDispatchId"></span>
+        </div>
+    </div>
+    <div class="form-group row">
+        <div class="col-md-3">
+            <nop-label asp-for="Status" />
+        </div>
+        <div class="col-md-9">
+            <nop-select asp-for="Status"
+                        asp-items="Model.AvailableStatuses" />
+            <span asp-validation-for="Status"></span>
+        </div>
+    </div>
+    @if (Model.Id <= 0)
+    {
+        <div class="form-group row">
+            <div class="col-md-3">
+                <nop-label asp-for="PalletCount" />
+            </div>
+            <div class="col-md-9">
+                <nop-editor asp-for="PalletCount" />
+                <span asp-validation-for="PalletCount"></span>
+            </div>
+        </div>
+    }
+</div>

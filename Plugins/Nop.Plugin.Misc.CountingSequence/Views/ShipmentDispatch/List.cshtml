@@ -1,0 +1,247 @@
+﻿@model ShipmentDispatchSearchModel
+@{
+    Layout = "_AdminLayout";
+    NopHtml.SetActiveMenuItemSystemName(CountingSequenceDefaults.CountingSequenceShipmentDispatch);
+}
+@{
+    const string hideSearchBlockAttributeName = "ProductListPage.HideSearchBlock";
+    var hideSearchBlock = await genericAttributeService.GetAttributeAsync<bool>(await workContext.GetCurrentCustomerAsync(), hideSearchBlockAttributeName);
+}
+@Html.AntiForgeryToken()
+
+<div class="content-header clearfix">
+    <h1 class="float-left">
+        @T("Plugins.Misc.CountingSequence.ShipmentDispatch")
+    </h1>
+    <div class="float-right">
+        <button type="button" class="btn btn-primary" onclick="openCreatePopup()">
+            <i class="fas fa-plus"></i>
+            @T("Plugins.Misc.CountingSequence.CreateShipmentDispatch")
+        </button>
+    </div>
+</div>
+<section class="content">
+    <div class="container-fluid">
+        <div class="form-horizontal">
+            <div class="cards-group">
+                <div class="card card-default card-search">
+                    <div class="card-body">
+                        <div class="row search-row @(!hideSearchBlock ? "opened" : "")" data-hideAttribute="@hideSearchBlockAttributeName">
+                            <div class="search-text">@T("Admin.Common.Search")</div>
+                            <div class="icon-search"><i class="fas fa-magnifying-glass" aria-hidden="true"></i></div>
+                            <div class="icon-collapse"><i class="far fa-angle-@(!hideSearchBlock ? "up" : "down")" aria-hidden="true"></i></div>
+                        </div>
+                        <div class="search-body @(hideSearchBlock ? "closed" : "")">
+                            <div class="row">
+                                <div class="col-md-5">
+                                    <div class="form-group row">
+                                        <div class="col-md-4">
+                                            <nop-label asp-for="SearchName" />
+                                        </div>
+                                        <div class="col-md-8">
+                                            <nop-editor asp-for="SearchName" />
+                                        </div>
+                                    </div>
+                                    <div class="form-group row">
+                                        <div class="col-md-4">
+                                            <nop-label asp-for="SearchDispatchTypeId" />
+                                        </div>
+                                        <div class="col-md-8">
+                                            <nop-select asp-for="SearchDispatchTypeId" asp-items="Model.AvailableDispatchType" />
+                                        </div>
+                                    </div>
+                                    <div class="form-group row">
+                                        <div class="col-md-4">
+                                            <nop-label asp-for="SearchMinMonth" />
+                                        </div>
+                                        <div class="col-md-8">
+                                            <nop-editor asp-for="SearchMinMonth" />
+                                        </div>
+                                    </div>
+                                    <div class="form-group row">
+                                        <div class="col-md-4">
+                                            <nop-label asp-for="SearchMaxMonth" />
+                                        </div>
+                                        <div class="col-md-8">
+                                            <nop-editor asp-for="SearchMaxMonth" />
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-7">
+                                    <div class="form-group row">
+                                        <div class="col-md-4">
+                                            <nop-label asp-for="SearchMinYear" />
+                                        </div>
+                                        <div class="col-md-8">
+                                            <nop-editor asp-for="SearchMinYear" />
+                                        </div>
+                                    </div>
+                                    <div class="form-group row">
+                                        <div class="col-md-4">
+                                            <nop-label asp-for="SearchMaxYear" />
+                                        </div>
+                                        <div class="col-md-8">
+                                            <nop-editor asp-for="SearchMaxYear" />
+                                        </div>
+                                    </div>
+                                    <div class="form-group row">
+                                        <div class="col-md-4">
+                                            <nop-label asp-for="SearchVisible" />
+                                        </div>
+                                        <div class="col-md-8">
+                                            <nop-select asp-for="SearchVisible" asp-items="Model.AvailableVisibleType" />
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-group row">
+                                <div class="text-center col-12">
+                                    <button type="button" id="search-shipmentdispatch" class="btn btn-primary btn-search">
+                                        <i class="fas fa-magnifying-glass"></i>
+                                        @T("Admin.Common.Search")
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                            
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-body">
+                        @await Html.PartialAsync("Table", new DataTablesModel
+                        {
+                             Name = "shipment-dispatch-grid",
+                             UrlRead = new DataUrl("List", "ShipmentDispatch", null),
+                             SearchButtonId = "search-shipmentdispatch",
+                             Length = Model.PageSize,
+                             LengthMenu = Model.AvailablePageSizes,
+                             Filters = new List<FilterParameter>
+                             {
+                                  new FilterParameter(nameof(Model.SearchName)),
+                                  new FilterParameter(nameof(Model.SearchDispatchTypeId)),
+                                  new FilterParameter(nameof(Model.SearchMinMonth)),
+                                  new FilterParameter(nameof(Model.SearchMaxMonth)),
+                                  new FilterParameter(nameof(Model.SearchMinYear)),
+                                  new FilterParameter(nameof(Model.SearchMaxYear)),
+                                  new FilterParameter(nameof(Model.SearchVisible)),
+                             },
+                             ColumnCollection = new List<ColumnProperty>
+                             {
+                                 new ColumnProperty(nameof(ShipmentDispatchModel.Name))
+                                 {
+                                     Title = T("Plugins.Misc.CountingSequence.ShipmentDispatch.Fields.Name").Text,
+                                 },
+                                 new ColumnProperty(nameof(ShipmentDispatchModel.DispatchTypeName))
+                                 {
+                                     Title = T("Plugins.Misc.CountingSequence.ShipmentDispatch.Fields.DispatchType").Text,
+                                     ClassName = NopColumnClassDefaults.CenterAll,
+                                 },
+                                 new ColumnProperty(nameof(ShipmentDispatchModel.ShippedMonth))
+                                 {
+                                     Title = T("Plugins.Misc.CountingSequence.ShipmentDispatch.Fields.ShippedMonth").Text,
+                                     ClassName = NopColumnClassDefaults.CenterAll,
+
+                                 },
+                                 new ColumnProperty(nameof(ShipmentDispatchModel.ShippedYear))
+                                 {
+                                     Title = T("Plugins.Misc.CountingSequence.ShipmentDispatch.Fields.ShippedYear").Text,
+                                     ClassName = NopColumnClassDefaults.CenterAll,
+                                 },
+                                 new ColumnProperty(nameof(ShipmentDispatchModel.DisplayOrder))
+                                 {
+                                     Title = T("Plugins.Misc.CountingSequence.ShipmentDispatch.Fields.DisplayOrder").Text,
+                                     ClassName = NopColumnClassDefaults.CenterAll,
+                                 },
+                                 new ColumnProperty(nameof(ShipmentDispatchModel.Visible))
+                                 {
+                                     Title = T("Plugins.Misc.CountingSequence.ShipmentDispatch.Fields.Visible").Text,
+                                     ClassName = NopColumnClassDefaults.CenterAll,
+                                     Render=new RenderBoolean()
+                                 },
+                                 new ColumnProperty(nameof(ShipmentDispatchModel.Id))
+                                 {
+                                     Title = "Actions",
+                                     Width = "150",
+                                     ClassName = NopColumnClassDefaults.Button,
+                                     Render = new RenderCustom("renderActions")
+                                 }
+                             }
+                        })
+                        
+                    </div>
+                </div>
+            </div>
+        </div>
+     </div>
+</section>
+
+<div class="modal fade" id="shipmentDispatchModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content" id="shipmentDispatchModalContent">
+        </div>
+    </div>
+</div>
+
+<script>
+
+     function renderActions(data, type, row, meta) {
+         return `
+             <button class="btn btn-sm btn-warning mr-1" onclick="openEditPopup(${data})"> Edit </button>
+             <button class="btn btn-sm btn-danger" onclick="deleteShipmentDispatch(${data})"> Delete </button>
+         `;
+     }
+
+    function deleteShipmentDispatch(id) {
+          if (!confirm('Are you sure you want to delete this shipment dispatch?'))
+              return;
+          $.ajax({
+              type: "POST",
+              url: '@Url.Action("Delete", "ShipmentDispatch")',
+              data: {
+                  id: id,
+                  __RequestVerificationToken: $('input[name="__RequestVerificationToken"]').val()
+              },
+              success: function (response) {
+                  if (response.success) {
+                   let htmlcode = '<div class="alert alert-success alert-dismissable"><button class="close" data-dismiss="alert" aria-hidden="true">×</button><span> ' + response.message + ' </span></div>'
+                   $('#admin-notifications').append(htmlcode);
+                   updateTable('#shipment-dispatch-grid'); 
+                  } else {
+                      alert('Delete failed');
+                  }
+              },
+              error: function () {
+                  alert('Error while deleting');
+              }
+          });
+    }
+
+    function openCreatePopup() {
+        $.get('@Url.Action("Create", "ShipmentDispatch")', function (data) {
+            $('#shipmentDispatchModalContent').html(data);
+            $('#shipmentDispatchModal').modal('show');
+        });
+    }
+
+    function openEditPopup(id) {
+        $.get('@Url.Action("Edit", "ShipmentDispatch")?id=' + id, function (data) {
+            $('#shipmentDispatchModalContent').html(data);
+            $('#shipmentDispatchModal').modal('show');
+        });
+    }
+
+    function saveShipmentDispatch(form) {
+        $.post(form.action, $(form).serialize(), function (result) {
+            if (result.success) {
+                $('#shipmentDispatchModal').modal('hide');
+                   let htmlcode = '<div class="alert alert-success alert-dismissable"><button class="close" data-dismiss="alert" aria-hidden="true">×</button><span> ' + result.message + ' </span></div>'
+                   $('#admin-notifications').append(htmlcode);
+                   updateTable('#shipment-dispatch-grid');
+            } else {
+                $('#shipmentDispatchModalContent').html(result);
+            }
+        });
+        return false;
+    }
+
+</script>

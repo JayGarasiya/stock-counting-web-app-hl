@@ -1,0 +1,47 @@
+﻿@model CountingSequenceRackProductDetail
+
+@if (Model.IsSummaryMode)
+{
+    Layout = "_AdminLayout";
+}
+
+<input type="hidden" name="StockCountId" value="@Model.StockCountId" />
+
+
+<h3 class="summary_title mb-3">@T("Plugins.Misc.CountingSequence.StockCount.Summary.RackTitle")</h3>
+<div class="warehouse_summary">
+    <table class="warehouse_summary_table">
+        <thead>
+            <tr>
+                <th>@T("Plugins.Misc.CountingSequence.StockCount.Summary.Product")</th>
+                <th>@T("Plugins.Misc.CountingSequence.StockCount.Summary.ProductQuantity")</th>
+                <th>@T("Plugins.Misc.CountingSequence.StockCount.Summary.NewProductQuantity")</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model.SummaryItems)
+            {
+                <tr>
+                    <td>@item.ProductName</td>
+                    <td>@item.LastMonthQuantity</td>
+                    <td>@item.Quantity</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+<button id="warehouse_complete_confirm_btn"
+        class="btn btn-success warehouse_complete_confirm_btn">
+    @T("Plugins.Misc.CountingSequence.StockCount.Summary.Complete")
+</button>
+
+<script>
+    document.getElementById("warehouse_complete_confirm_btn")
+        .addEventListener("click", function () {
+
+            if (confirm('@T("Plugins.Misc.CountingSequence.Rack.Complete.Warning")')) {
+                completeRackCount();
+            }
+
+        });
+</script>
